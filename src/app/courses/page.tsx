@@ -1,3 +1,4 @@
+
 import { courses } from "@/lib/data";
 import {
   Accordion,
@@ -14,6 +15,9 @@ export const metadata = {
   title: "Our Courses",
   description: "Explore our wide range of IT and computer courses. Find details on duration, syllabus, and fees.",
 };
+
+// This forces the page to be dynamically rendered
+export const revalidate = 0;
 
 export default function CoursesPage() {
   return (
