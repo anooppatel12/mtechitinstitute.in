@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlusCircle, MoreHorizontal, File, LogOut } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,7 +41,7 @@ export default function AdminDashboardPage() {
                  <Logo />
                  <div className="ml-auto">
                     <Button variant="outline" size="icon" asChild>
-                        <Link href="/">
+                        <Link href="/admin/login">
                             <LogOut className="h-4 w-4" />
                             <span className="sr-only">Logout</span>
                         </Link>
