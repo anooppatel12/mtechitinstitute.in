@@ -10,6 +10,9 @@ export const metadata = {
   description: "Read our latest articles on IT, career guidance, and productivity tips.",
 };
 
+// This forces the page to be dynamically rendered
+export const revalidate = 0;
+
 async function getPostsWithSummaries(): Promise<BlogPost[]> {
     const postsWithSummaries = await Promise.all(
         blogPosts.map(async (post) => {
