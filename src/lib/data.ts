@@ -203,5 +203,12 @@ export const resources: Resource[] = [
         description: 'Comprehensive notes covering the basics of Tally.',
         type: 'PDF',
         fileUrl: '#'
+    },
+    {
+        id: '5',
+        title: 'Advanced Excel Cheatsheet',
+        description: 'A cheatsheet for advanced excel formulas and functions.',
+        type: 'PDF',
+        fileUrl: '#'
     }
 ]
