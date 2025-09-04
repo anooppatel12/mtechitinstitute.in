@@ -44,7 +44,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             <article className="lg:col-span-3 prose prose-lg max-w-none dark:prose-invert prose-headings:font-headline prose-headings:text-primary prose-a:text-accent">
                 <div className="mb-8">
                     <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6">
-                        <Image src={post.image} alt={post.title} data-ai-hint="blog post" fill className="object-cover" />
+                        <Image src={post.image} alt={post.title} data-ai-hint={post.tags.slice(0, 2).join(' ')} fill className="object-cover" />
                     </div>
                     <h1 className="text-3xl md:text-4xl">{post.title}</h1>
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground mt-4">

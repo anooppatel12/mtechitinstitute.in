@@ -50,7 +50,7 @@ export default function ContactPreview() {
           </div>
           <div className="rounded-lg overflow-hidden shadow-lg">
             <Image
-              src="https://picsum.photos/seed/map/800/600"
+              src="https://picsum.photos/seed/location-map/800/600"
               alt="Google Map preview"
               data-ai-hint="map location"
               width={800}

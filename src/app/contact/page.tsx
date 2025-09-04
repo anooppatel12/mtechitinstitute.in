@@ -78,7 +78,7 @@ export default function ContactPage() {
         <div className="mt-16">
             <div className="rounded-lg overflow-hidden shadow-lg">
                 <Image
-                    src="https://picsum.photos/seed/map-large/1200/400"
+                    src="https://picsum.photos/seed/india-map/1200/400"
                     alt="Google Map showing institute location"
                     data-ai-hint="map satellite"
                     width={1200}

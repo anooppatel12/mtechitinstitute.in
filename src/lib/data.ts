@@ -17,7 +17,7 @@ export const courses: Course[] = [
     duration: "4 Weeks",
     fees: "₹4,000",
     syllabus: ["Word Processing", "Spreadsheet Management", "Presentation Skills", "Outlook Basics"],
-    image: "https://picsum.photos/600/400?random=1",
+    image: "https://picsum.photos/seed/office-suite/600/400",
   },
   {
     id: "advanced-excel",
@@ -26,7 +26,7 @@ export const courses: Course[] = [
     duration: "6 Weeks",
     fees: "₹6,000",
     syllabus: ["Advanced Formulas", "PivotTables & PivotCharts", "Data Validation & Protection", "Macros & VBA"],
-    image: "https://picsum.photos/600/400?random=2",
+    image: "https://picsum.photos/seed/excel-spreadsheet/600/400",
   },
   {
     id: "tally-erp",
@@ -35,7 +35,7 @@ export const courses: Course[] = [
     duration: "5 Weeks",
     fees: "₹5,500",
     syllabus: ["Company Creation", "Ledger Management", "GST Taxation", "Payroll & Reporting"],
-    image: "https://picsum.photos/600/400?random=3",
+    image: "https://picsum.photos/seed/accounting-software/600/400",
   },
   {
     id: "programming-basics",
@@ -44,7 +44,7 @@ export const courses: Course[] = [
     duration: "8 Weeks",
     fees: "₹8,000",
     syllabus: ["Variables & Data Types", "Control Structures", "Functions & Pointers", "Object-Oriented Programming"],
-    image: "https://picsum.photos/600/400?random=4",
+    image: "https://picsum.photos/seed/programming-code/600/400",
   },
   {
     id: "web-design",
@@ -53,7 +53,7 @@ export const courses: Course[] = [
     duration: "10 Weeks",
     fees: "₹12,000",
     syllabus: ["HTML5 & Semantic Tags", "CSS3 & Flexbox/Grid", "JavaScript DOM Manipulation", "Responsive Design"],
-    image: "https://picsum.photos/600/400?random=5",
+    image: "https://picsum.photos/seed/web-design-code/600/400",
   },
   {
     id: "powerpoint-pro",
@@ -62,7 +62,7 @@ export const courses: Course[] = [
     duration: "3 Weeks",
     fees: "₹3,000",
     syllabus: ["Advanced Slide Design", "Animation & Transitions", "Master Slides & Templates", "Interactive Presentations"],
-    image: "https://picsum.photos/600/400?random=6",
+    image: "https://picsum.photos/seed/presentation-design/600/400",
   },
 ];
 
@@ -74,7 +74,7 @@ export const blogPosts: BlogPost[] = [
     author: "Admin",
     category: "Productivity",
     tags: ["MS Word", "Shortcuts", "Tips"],
-    image: "https://picsum.photos/800/450?random=7",
+    image: "https://picsum.photos/seed/ms-word-document/800/450",
     content: `
       <h2>Introduction to MS Word Shortcuts</h2>
       <p>Microsoft Word is one of the most widely used word processors in the world. While many are familiar with its basic features, mastering keyboard shortcuts can dramatically increase your efficiency. In this article, we'll explore 20 essential shortcuts that every Word user should know.</p>
@@ -123,7 +123,7 @@ export const blogPosts: BlogPost[] = [
     author: "Admin",
     category: "Career Guidance",
     tags: ["Courses", "Career", "Students"],
-    image: "https://picsum.photos/800/450?random=8",
+    image: "https://picsum.photos/seed/career-student/800/450",
     content: `
       <h2>Navigating Your Career Path</h2>
       <p>Completing 12th grade is a significant milestone, and choosing the right career path is the next crucial step. The IT industry offers a plethora of opportunities, and the right computer course can set you up for success. This guide highlights some of the best computer courses to consider.</p>
@@ -153,7 +153,7 @@ export const blogPosts: BlogPost[] = [
     author: "Admin",
     category: "Tutorials",
     tags: ["Excel", "Beginners", "Tips"],
-    image: "https://picsum.photos/800/450?random=9",
+    image: "https://picsum.photos/seed/excel-tips/800/450",
     content: `
       <h2>Getting Started with Excel</h2>
       <p>Microsoft Excel can seem intimidating at first, but with a few tips, you can quickly become proficient. Here are 10 essential tips for beginners to help you get started.</p>

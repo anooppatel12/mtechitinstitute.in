@@ -24,7 +24,7 @@ export default function BlogCard({ post }: BlogCardProps) {
             <Image
               src={post.image}
               alt={post.title}
-              data-ai-hint="blog abstract"
+              data-ai-hint={post.tags.slice(0, 2).join(' ')}
               fill
               className="object-cover"
             />

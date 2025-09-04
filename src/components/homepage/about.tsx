@@ -21,7 +21,7 @@ export default function About() {
             <Card className="overflow-hidden shadow-lg">
               <CardContent className="p-0">
                 <Image
-                  src="https://picsum.photos/800/600"
+                  src="https://picsum.photos/seed/classroom/800/600"
                   alt="Students learning in a modern classroom"
                   data-ai-hint="modern classroom"
                   width={800}
