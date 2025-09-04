@@ -141,8 +141,7 @@ export default function AdminDashboardPage() {
                  const newResource: Resource = {
                     ...formData,
                     id: getNewId('resource'),
-                    fileUrl: '#'
-                };
+                 };
                 setResources([newResource, ...resources]);
             }
         }
@@ -216,6 +215,10 @@ export default function AdminDashboardPage() {
                     <div className="grid gap-2">
                         <Label htmlFor="type">Type (PDF, Worksheet, Quiz)</Label>
                         <Input id="type" name="type" value={formData.type || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="fileUrl">File URL</Label>
+                        <Input id="fileUrl" name="fileUrl" value={formData.fileUrl || ''} onChange={handleFormChange} placeholder="https://example.com/file.pdf" />
                     </div>
                 </>
             );
@@ -450,5 +453,7 @@ export default function AdminDashboardPage() {
         </>
     );
 }
+
+    
 
     
