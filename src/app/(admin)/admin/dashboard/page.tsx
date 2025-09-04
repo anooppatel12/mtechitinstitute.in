@@ -114,17 +114,37 @@ export default function AdminDashboardPage() {
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const getNewId = () => `${activeTab}-${Date.now()}`;
+        const getNewId = (prefix: string) => `${prefix}-${Date.now()}`;
 
         if (editingItem) { // Update existing item
             if (activeTab === 'course') setCourses(courses.map(c => c.id === (editingItem as Course).id ? formData : c));
             if (activeTab === 'blog') setBlogPosts(blogPosts.map(b => b.slug === (editingItem as BlogPost).slug ? formData : b));
             if (activeTab === 'resource') setResources(resources.map(r => r.id === (editingItem as Resource).id ? formData : r));
         } else { // Add new item
-            const newItem = { ...formData, id: getNewId(), slug: getNewId() };
-            if (activeTab === 'course') setCourses([newItem, ...courses]);
-            if (activeTab === 'blog') setBlogPosts([newItem, ...blogPosts]);
-            if (activeTab === 'resource') setResources([newItem, ...resources]);
+            if (activeTab === 'course') {
+                const newCourse: Course = {
+                    ...formData,
+                    id: getNewId('course'),
+                    image: 'https://picsum.photos/seed/new-course/600/400' 
+                };
+                setCourses([newCourse, ...courses]);
+            }
+            if (activeTab === 'blog') {
+                const newPost: BlogPost = {
+                    ...formData,
+                    slug: getNewId('blog'),
+                    image: 'https://picsum.photos/seed/new-post/800/450'
+                };
+                setBlogPosts([newPost, ...blogPosts]);
+            }
+            if (activeTab === 'resource') {
+                 const newResource: Resource = {
+                    ...formData,
+                    id: getNewId('resource'),
+                    fileUrl: '#'
+                };
+                setResources([newResource, ...resources]);
+            }
         }
         setIsFormOpen(false);
     };
@@ -430,3 +450,5 @@ export default function AdminDashboardPage() {
         </>
     );
 }
+
+    
