@@ -61,7 +61,7 @@ import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource } from "@/lib/types";
 
-type ItemType = 'course' | 'blog' | 'resource';
+type ItemType = 'courses' | 'blog' | 'resources';
 
 export default function AdminDashboardPage() {
     const [courses, setCourses] = useState<Course[]>(initialCourses);
@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<Course | BlogPost | Resource | null>(null);
     const [formData, setFormData] = useState<any>({});
-    const [activeTab, setActiveTab] = useState<ItemType>('course');
+    const [activeTab, setActiveTab] = useState<ItemType>('courses');
 
     const openConfirmationDialog = (type: ItemType, id: string) => {
         setItemToDelete({ type, id });
@@ -84,9 +84,9 @@ export default function AdminDashboardPage() {
     const handleDelete = () => {
         if (!itemToDelete) return;
         const { type, id } = itemToDelete;
-        if (type === 'course') setCourses(courses.filter(c => c.id !== id));
+        if (type === 'courses') setCourses(courses.filter(c => c.id !== id));
         if (type === 'blog') setBlogPosts(blogPosts.filter(b => b.slug !== id));
-        if (type === 'resource') setResources(resources.filter(r => r.id !== id));
+        if (type === 'resources') setResources(resources.filter(r => r.id !== id));
         setDialogOpen(false);
         setItemToDelete(null);
     };
@@ -117,11 +117,11 @@ export default function AdminDashboardPage() {
         const getNewId = (prefix: string) => `${prefix}-${Date.now()}`;
 
         if (editingItem) { // Update existing item
-            if (activeTab === 'course') setCourses(courses.map(c => c.id === (editingItem as Course).id ? formData : c));
+            if (activeTab === 'courses') setCourses(courses.map(c => c.id === (editingItem as Course).id ? formData : c));
             if (activeTab === 'blog') setBlogPosts(blogPosts.map(b => b.slug === (editingItem as BlogPost).slug ? formData : b));
-            if (activeTab === 'resource') setResources(resources.map(r => r.id === (editingItem as Resource).id ? formData : r));
+            if (activeTab === 'resources') setResources(resources.map(r => r.id === (editingItem as Resource).id ? formData : r));
         } else { // Add new item
-            if (activeTab === 'course') {
+            if (activeTab === 'courses') {
                 const newCourse: Course = {
                     ...formData,
                     id: getNewId('course'),
@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
                 };
                 setBlogPosts([newPost, ...blogPosts]);
             }
-            if (activeTab === 'resource') {
+            if (activeTab === 'resources') {
                  const newResource: Resource = {
                     ...formData,
                     id: getNewId('resource'),
@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
 
     const renderFormFields = () => {
         switch(activeTab) {
-            case 'course': return (
+            case 'courses': return (
                 <>
                     <div className="grid gap-2">
                         <Label htmlFor="title">Title</Label>
@@ -203,7 +203,7 @@ export default function AdminDashboardPage() {
                     </div>
                 </>
             );
-            case 'resource': return (
+            case 'resources': return (
                 <>
                     <div className="grid gap-2">
                         <Label htmlFor="title">Title</Label>
@@ -293,7 +293,7 @@ export default function AdminDashboardPage() {
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                 <DropdownMenuSeparator />
                                                                 <DropdownMenuItem onClick={() => handleEdit(course)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('course', course.id)}>
+                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('courses', course.id)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
@@ -395,7 +395,7 @@ export default function AdminDashboardPage() {
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                  <DropdownMenuSeparator />
                                                                 <DropdownMenuItem onClick={() => handleEdit(resource)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('resource', resource.id)}>
+                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('resources', resource.id)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
