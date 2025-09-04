@@ -64,9 +64,15 @@ import type { Course, BlogPost, Resource } from "@/lib/types";
 type ItemType = 'courses' | 'blog' | 'resources';
 
 export default function AdminDashboardPage() {
-    const [courses, setCourses] = useState<Course[]>(initialCourses);
-    const [blogPosts, setBlogPosts] = useState<BlogPost[]>(initialBlogPosts);
-    const [resources, setResources] = useState<Resource[]>(initialResources);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+    const [resources, setResources] = useState<Resource[]>([]);
+
+    useEffect(() => {
+        setCourses(initialCourses);
+        setBlogPosts(initialBlogPosts);
+        setResources(initialResources);
+    }, []);
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<{type: ItemType, id: string} | null>(null);
@@ -453,7 +459,5 @@ export default function AdminDashboardPage() {
         </>
     );
 }
-
-    
 
     
