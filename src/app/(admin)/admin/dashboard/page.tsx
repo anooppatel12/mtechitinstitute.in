@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,10 +45,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { courses as initialCourses, blogPosts as initialBlogPosts, resources as initialResources } from "@/lib/data";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource } from "@/lib/types";
+
+type ItemType = 'course' | 'blog' | 'resource';
 
 export default function AdminDashboardPage() {
     const [courses, setCourses] = useState<Course[]>(initialCourses);
@@ -56,30 +69,140 @@ export default function AdminDashboardPage() {
     const [resources, setResources] = useState<Resource[]>(initialResources);
 
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<{type: 'course' | 'blog' | 'resource', id: string} | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<{type: ItemType, id: string} | null>(null);
 
-    const openConfirmationDialog = (type: 'course' | 'blog' | 'resource', id: string) => {
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<Course | BlogPost | Resource | null>(null);
+    const [formData, setFormData] = useState<any>({});
+    const [activeTab, setActiveTab] = useState<ItemType>('course');
+
+    const openConfirmationDialog = (type: ItemType, id: string) => {
         setItemToDelete({ type, id });
         setDialogOpen(true);
     };
 
     const handleDelete = () => {
         if (!itemToDelete) return;
-
-        switch (itemToDelete.type) {
-            case 'course':
-                setCourses(courses.filter(c => c.id !== itemToDelete.id));
-                break;
-            case 'blog':
-                setBlogPosts(blogPosts.filter(p => p.slug !== itemToDelete.id));
-                break;
-            case 'resource':
-                setResources(resources.filter(r => r.id !== itemToDelete.id));
-                break;
-        }
+        const { type, id } = itemToDelete;
+        if (type === 'course') setCourses(courses.filter(c => c.id !== id));
+        if (type === 'blog') setBlogPosts(blogPosts.filter(b => b.slug !== id));
+        if (type === 'resource') setResources(resources.filter(r => r.id !== id));
         setDialogOpen(false);
         setItemToDelete(null);
     };
+    
+    const handleAddNew = () => {
+        setEditingItem(null);
+        setFormData({});
+        setIsFormOpen(true);
+    };
+
+    const handleEdit = (item: Course | BlogPost | Resource) => {
+        setEditingItem(item);
+        setFormData(item);
+        setIsFormOpen(true);
+    };
+
+    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        if (name === 'tags' || name === 'syllabus') {
+            setFormData({ ...formData, [name]: value.split(',').map(s => s.trim()) });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const getNewId = () => `${activeTab}-${Date.now()}`;
+
+        if (editingItem) { // Update existing item
+            if (activeTab === 'course') setCourses(courses.map(c => c.id === (editingItem as Course).id ? formData : c));
+            if (activeTab === 'blog') setBlogPosts(blogPosts.map(b => b.slug === (editingItem as BlogPost).slug ? formData : b));
+            if (activeTab === 'resource') setResources(resources.map(r => r.id === (editingItem as Resource).id ? formData : r));
+        } else { // Add new item
+            const newItem = { ...formData, id: getNewId(), slug: getNewId() };
+            if (activeTab === 'course') setCourses([newItem, ...courses]);
+            if (activeTab === 'blog') setBlogPosts([newItem, ...blogPosts]);
+            if (activeTab === 'resource') setResources([newItem, ...resources]);
+        }
+        setIsFormOpen(false);
+    };
+
+    const renderFormFields = () => {
+        switch(activeTab) {
+            case 'course': return (
+                <>
+                    <div className="grid gap-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input id="title" name="title" value={formData.title || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea id="description" name="description" value={formData.description || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="fees">Fees</Label>
+                        <Input id="fees" name="fees" value={formData.fees || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="duration">Duration</Label>
+                        <Input id="duration" name="duration" value={formData.duration || ''} onChange={handleFormChange} />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="syllabus">Syllabus (comma-separated)</Label>
+                        <Textarea id="syllabus" name="syllabus" value={Array.isArray(formData.syllabus) ? formData.syllabus.join(', ') : ''} onChange={handleFormChange} />
+                    </div>
+                </>
+            );
+            case 'blog': return (
+                <>
+                    <div className="grid gap-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input id="title" name="title" value={formData.title || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="author">Author</Label>
+                        <Input id="author" name="author" value={formData.author || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="date">Date</Label>
+                        <Input id="date" name="date" type="date" value={formData.date || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="category">Category</Label>
+                        <Input id="category" name="category" value={formData.category || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="content">Content (HTML)</Label>
+                        <Textarea id="content" name="content" value={formData.content || ''} onChange={handleFormChange} rows={10} />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="tags">Tags (comma-separated)</Label>
+                        <Input id="tags" name="tags" value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''} onChange={handleFormChange} />
+                    </div>
+                </>
+            );
+            case 'resource': return (
+                <>
+                    <div className="grid gap-2">
+                        <Label htmlFor="title">Title</Label>
+                        <Input id="title" name="title" value={formData.title || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea id="description" name="description" value={formData.description || ''} onChange={handleFormChange} />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="type">Type (PDF, Worksheet, Quiz)</Label>
+                        <Input id="type" name="type" value={formData.type || ''} onChange={handleFormChange} />
+                    </div>
+                </>
+            );
+            default: return null;
+        }
+    }
+
 
     return (
         <>
@@ -96,7 +219,7 @@ export default function AdminDashboardPage() {
                     </div>
                 </header>
                 <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-                    <Tabs defaultValue="courses">
+                    <Tabs defaultValue="courses" onValueChange={(value) => setActiveTab(value as ItemType)}>
                         <div className="flex items-center">
                             <TabsList>
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
@@ -104,7 +227,7 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="resources">Resources</TabsTrigger>
                             </TabsList>
                             <div className="ml-auto flex items-center gap-2">
-                                <Button size="sm" className="h-8 gap-1">
+                                <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                                         Add New
@@ -149,7 +272,7 @@ export default function AdminDashboardPage() {
                                                             <DropdownMenuContent align="end">
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleEdit(course)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                                                                 <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('course', course.id)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
@@ -200,7 +323,7 @@ export default function AdminDashboardPage() {
                                                             <DropdownMenuContent align="end">
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                  <DropdownMenuSeparator />
-                                                                <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleEdit(post)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                                                                 <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('blog', post.slug)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
@@ -251,7 +374,7 @@ export default function AdminDashboardPage() {
                                                             <DropdownMenuContent align="end">
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                  <DropdownMenuSeparator />
-                                                                <DropdownMenuItem><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleEdit(resource)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                                                                 <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('resource', resource.id)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
@@ -273,17 +396,37 @@ export default function AdminDashboardPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete this item from your data.
+                            This action cannot be undone. This will permanently delete this item.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setDialogOpen(false)}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
                             Yes, delete it
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            
+            <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+                <DialogContent className="sm:max-w-[425px] md:max-w-lg max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>{editingItem ? `Edit ${activeTab}` : `Add New ${activeTab}`}</DialogTitle>
+                        <DialogDescription>
+                           {editingItem ? `Make changes to your ${activeTab} here.` : `Add a new ${activeTab} to your site.`} Click save when you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleFormSubmit}>
+                        <div className="grid gap-4 py-4">
+                           {renderFormFields()}
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}>Cancel</Button>
+                            <Button type="submit">Save changes</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
