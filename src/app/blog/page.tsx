@@ -1,5 +1,5 @@
+
 import { blogPosts } from "@/lib/data";
-import { summarizeBlogArticle } from "@/ai/flows/summarize-blog-article";
 import BlogCard from "@/components/blog-card";
 import AdPlaceholder from "@/components/ad-placeholder";
 import type { BlogPost } from "@/lib/types";
@@ -13,27 +13,17 @@ export const metadata = {
 // This forces the page to be dynamically rendered
 export const revalidate = 0;
 
-async function getPostsWithSummaries(): Promise<BlogPost[]> {
-    const postsWithSummaries = await Promise.all(
-        blogPosts.map(async (post) => {
-            try {
-                const summaryResult = await summarizeBlogArticle({ articleContent: post.content });
-                return { ...post, summary: summaryResult.summary };
-            } catch (error) {
-                console.error(`Failed to summarize article: ${post.slug}`, error);
-                // Fallback to a snippet of the content
-                const snippet = post.content.replace(/<[^>]+>/g, '').substring(0, 150);
-                return { ...post, summary: `${snippet}...` };
-            }
-        })
-    );
-    return postsWithSummaries;
+function getPostsWithSnippets(): BlogPost[] {
+    return blogPosts.map(post => {
+        const snippet = post.content.replace(/<[^>]+>/g, '').substring(0, 150);
+        return { ...post, summary: `${snippet}...` };
+    });
 }
 
 const allTags = [...new Set(blogPosts.flatMap(p => p.tags))];
 
 export default async function BlogPage() {
-  const posts = await getPostsWithSummaries();
+  const posts = getPostsWithSnippets();
 
   return (
     <div className="bg-secondary">
