@@ -56,10 +56,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { courses as initialCourses, blogPosts as initialBlogPosts, resources as initialResources } from "@/lib/data";
+import { blogPosts as initialBlogPosts, resources as initialResources } from "@/lib/data";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource } from "@/lib/types";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+
 
 type ItemType = 'courses' | 'blog' | 'resources';
 
@@ -67,11 +70,20 @@ export default function AdminDashboardPage() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [resources, setResources] = useState<Resource[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setCourses(initialCourses);
+        const fetchCourses = async () => {
+            const coursesCollection = collection(db, "courses");
+            const courseSnapshot = await getDocs(coursesCollection);
+            const courseList = courseSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
+            setCourses(courseList);
+        };
+
+        fetchCourses();
         setBlogPosts(initialBlogPosts);
         setResources(initialResources);
+        setLoading(false);
     }, []);
 
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -87,12 +99,15 @@ export default function AdminDashboardPage() {
         setDialogOpen(true);
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!itemToDelete) return;
         const { type, id } = itemToDelete;
-        if (type === 'courses') setCourses(courses.filter(c => c.id !== id));
-        if (type === 'blog') setBlogPosts(blogPosts.filter(b => b.slug !== id));
-        if (type === 'resources') setResources(resources.filter(r => r.id !== id));
+        if (type === 'courses') {
+            await deleteDoc(doc(db, "courses", id));
+            setCourses(courses.filter(c => c.id !== id));
+        }
+        if (type === 'blog') setBlogPosts(blogPosts.filter(b => b.slug !== id)); // TODO: Firestore
+        if (type === 'resources') setResources(resources.filter(r => r.id !== id)); // TODO: Firestore
         setDialogOpen(false);
         setItemToDelete(null);
     };
@@ -118,39 +133,43 @@ export default function AdminDashboardPage() {
         }
     };
 
-    const handleFormSubmit = (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const getNewId = (prefix: string) => `${prefix}-${Date.now()}`;
 
-        if (editingItem) { // Update existing item
-            if (activeTab === 'courses') setCourses(courses.map(c => c.id === (editingItem as Course).id ? formData : c));
-            if (activeTab === 'blog') setBlogPosts(blogPosts.map(b => b.slug === (editingItem as BlogPost).slug ? formData : b));
-            if (activeTab === 'resources') setResources(resources.map(r => r.id === (editingItem as Resource).id ? formData : r));
-        } else { // Add new item
-            if (activeTab === 'courses') {
-                const newCourse: Course = {
-                    ...formData,
-                    id: getNewId('course'),
-                    image: 'https://picsum.photos/seed/new-course/600/400' 
-                };
-                setCourses([newCourse, ...courses]);
+        if (activeTab === 'courses') {
+            const courseData = {
+                ...formData,
+                image: formData.image || 'https://picsum.photos/seed/new-course/600/400'
+            };
+            if (editingItem) { // Update existing item
+                const courseDoc = doc(db, "courses", (editingItem as Course).id);
+                await updateDoc(courseDoc, courseData);
+                setCourses(courses.map(c => c.id === (editingItem as Course).id ? { ...c, ...courseData } : c));
+            } else { // Add new item
+                const docRef = await addDoc(collection(db, "courses"), courseData);
+                setCourses([{ ...courseData, id: docRef.id }, ...courses]);
             }
-            if (activeTab === 'blog') {
-                const newPost: BlogPost = {
-                    ...formData,
-                    slug: getNewId('blog'),
-                    image: 'https://picsum.photos/seed/new-post/800/450'
-                };
+        }
+        // TODO: Handle Blog and Resources with Firestore
+        if (activeTab === 'blog') {
+            const getNewId = (prefix: string) => `${prefix}-${Date.now()}`;
+            if (editingItem) {
+                setBlogPosts(blogPosts.map(b => b.slug === (editingItem as BlogPost).slug ? formData : b));
+            } else {
+                const newPost: BlogPost = { ...formData, slug: getNewId('blog'), image: 'https://picsum.photos/seed/new-post/800/450' };
                 setBlogPosts([newPost, ...blogPosts]);
             }
-            if (activeTab === 'resources') {
-                 const newResource: Resource = {
-                    ...formData,
-                    id: getNewId('resource'),
-                 };
+        }
+        if (activeTab === 'resources') {
+             const getNewId = (prefix: string) => `${prefix}-${Date.now()}`;
+            if (editingItem) {
+                setResources(resources.map(r => r.id === (editingItem as Resource).id ? formData : r));
+            } else {
+                const newResource: Resource = { ...formData, id: getNewId('resource') };
                 setResources([newResource, ...resources]);
             }
         }
+
         setIsFormOpen(false);
     };
 
@@ -218,13 +237,13 @@ export default function AdminDashboardPage() {
                         <Label htmlFor="description">Description</Label>
                         <Textarea id="description" name="description" value={formData.description || ''} onChange={handleFormChange} />
                     </div>
-                    <div className="grid gap-2">
+                     <div className="grid gap-2">
                         <Label htmlFor="type">Type (PDF, Worksheet, Quiz)</Label>
                         <Input id="type" name="type" value={formData.type || ''} onChange={handleFormChange} />
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="fileUrl">File URL</Label>
-                        <Input id="fileUrl" name="fileUrl" value={formData.fileUrl || ''} onChange={handleFormChange} placeholder="https://example.com/file.pdf" />
+                        <Input id="fileUrl" name="fileUrl" value={formData.fileUrl || ''} onChange={handleFormChange} placeholder="https://example.com/file.pdf"/>
                     </div>
                 </>
             );
@@ -273,6 +292,7 @@ export default function AdminDashboardPage() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
+                                    {loading ? <p>Loading courses...</p> :
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
@@ -312,6 +332,7 @@ export default function AdminDashboardPage() {
                                             ))}
                                         </TableBody>
                                     </Table>
+                                    }
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -459,5 +480,3 @@ export default function AdminDashboardPage() {
         </>
     );
 }
-
-    
