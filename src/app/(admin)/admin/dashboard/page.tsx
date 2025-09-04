@@ -30,8 +30,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { courses, blogPosts } from "@/lib/data";
+import { courses, blogPosts, resources } from "@/lib/data";
 import Logo from "@/components/logo";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminDashboardPage() {
     return (
@@ -53,6 +54,7 @@ export default function AdminDashboardPage() {
                         <TabsList>
                             <TabsTrigger value="courses">Courses</TabsTrigger>
                             <TabsTrigger value="blog">Blog Posts</TabsTrigger>
+                            <TabsTrigger value="resources">Resources</TabsTrigger>
                         </TabsList>
                         <div className="ml-auto flex items-center gap-2">
                             <Button size="sm" className="h-8 gap-1">
@@ -137,6 +139,54 @@ export default function AdminDashboardPage() {
                                                 <TableCell className="font-medium">{post.title}</TableCell>
                                                 <TableCell>{post.author}</TableCell>
                                                 <TableCell>{post.date}</TableCell>
+                                                <TableCell>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                                <span className="sr-only">Toggle menu</span>
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="resources">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Resources</CardTitle>
+                                <CardDescription>
+                                    Manage your student resources.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Title</TableHead>
+                                            <TableHead>Type</TableHead>
+                                            <TableHead>
+                                                <span className="sr-only">Actions</span>
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {resources.map(resource => (
+                                            <TableRow key={resource.id}>
+                                                <TableCell className="font-medium">{resource.title}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant="outline">{resource.type}</Badge>
+                                                </TableCell>
                                                 <TableCell>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
