@@ -204,7 +204,7 @@ export const resources: Resource[] = [
         type: 'PDF',
         fileUrl: '#'
     },
-    {
+     {
         id: '5',
         title: 'Advanced Excel Cheatsheet',
         description: 'A cheatsheet for advanced excel formulas and functions.',
@@ -212,3 +212,5 @@ export const resources: Resource[] = [
         fileUrl: '#'
     }
 ]
+
+    
