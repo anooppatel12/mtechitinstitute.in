@@ -44,8 +44,8 @@ export default function ResourcesPage() {
     setIsPreviewOpen(true);
   };
   
-  const renderSkeleton = () => (
-    <div className="shadow-sm rounded-lg border bg-card">
+  const renderSkeleton = (key: number) => (
+    <div key={key} className="shadow-sm rounded-lg border bg-card">
         <div className="p-6 flex flex-row items-center gap-4">
              <Skeleton className="h-8 w-8 rounded" />
              <div className='w-full space-y-2'>
@@ -80,7 +80,7 @@ export default function ResourcesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {loading ? (
                           <>
-                            {Array.from({ length: 4 }).map((_, i) => renderSkeleton())}
+                            {Array.from({ length: 4 }).map((_, i) => renderSkeleton(i))}
                           </>
                       ) : (
                            resources.map((resource) => (
