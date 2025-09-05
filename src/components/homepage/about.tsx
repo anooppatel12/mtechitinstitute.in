@@ -21,9 +21,9 @@ export default function About() {
             <Card className="overflow-hidden shadow-lg">
               <CardContent className="p-0">
                 <Image
-                  src="https://picsum.photos/seed/classroom/800/600"
-                  alt="Students learning in a modern classroom"
-                  data-ai-hint="modern classroom"
+                  src="https://images.jdmagicbox.com/comp/bhopal/y8/0755p755stdy8/catalogue/mtech-it-institute-indrapuri-bhopal-computer-training-institutes-fqw2b0n.jpg"
+                  alt="MTech IT Institute Certificate"
+                  data-ai-hint="certificate award"
                   width={800}
                   height={600}
                   className="w-full h-auto object-cover"
