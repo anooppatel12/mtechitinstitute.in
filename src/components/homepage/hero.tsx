@@ -7,7 +7,7 @@ export default function Hero() {
     <section className="relative">
       <div className="absolute inset-0 z-[-1]">
         <Image
-          src="https://storage.googleapis.com/stabl-media/6979a022-f946-4c3e-908c-947703358055/original.jpg"
+          src="https://res.cloudinary.com/dzr4xjizf/image/upload/v1757058175/ChatGPT_Image_Sep_5_2025_12_30_58_AM_lskaik.png"
           alt="MTech IT Institute computer lab"
           data-ai-hint="computer lab"
           fill
