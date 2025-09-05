@@ -178,15 +178,15 @@ export default function AdminDashboardPage() {
       if (!title) return '';
       return title
         .toLowerCase()
-        .replace(/[^a-z0-9\\s-]/g, '') // remove non-alphanumeric characters
+        .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters
         .trim()
-        .replace(/\\s+/g, '-') // replace spaces with hyphens
+        .replace(/\s+/g, '-') // replace spaces with hyphens
         .replace(/-+/g, '-'); // remove consecutive hyphens
     };
 
     const convertToDirectDownloadLink = (url: string): string => {
         if (!url) return url;
-        const gDriveRegex = /https:\\/\\/drive\\.google\\.com\\/file\\/d\\/([a-zA-Z0-9_-]+)/;
+        const gDriveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
         const match = url.match(gDriveRegex);
         if (match && match[1]) {
             const fileId = match[1];
