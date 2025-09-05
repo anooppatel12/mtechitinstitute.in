@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
         setStep('otp');
         toast({
             title: "OTP Sent",
-            description: `An OTP has been sent to your email. (Hint: It's ${otpResponse.otp})`,
+            description: `An OTP has been sent to your email.`,
         });
 
     } catch (error: any) {
