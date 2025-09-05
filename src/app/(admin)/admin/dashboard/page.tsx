@@ -60,7 +60,7 @@ import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource } from "@/lib/types";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc } from "firebase/firestore";
 
 
 type ItemType = 'courses' | 'blog' | 'resources';
@@ -152,6 +152,7 @@ export default function AdminDashboardPage() {
     };
     
     const createSlug = (title: string) => {
+      if (!title) return '';
       return title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters
@@ -183,13 +184,16 @@ export default function AdminDashboardPage() {
                     await updateDoc(blogDoc, blogData);
                 } else {
                     const newSlug = createSlug(formData.title);
-                    const newPostData = { ...formData };
+                    if (!newSlug) {
+                        console.error("Cannot create blog post without a title.");
+                        // Optionally, show an error to the user
+                        return;
+                    }
+                    const newPostData = { ...blogData };
                     // We don't save slug in the document, it's the document ID
-                    delete newPostData.slug; 
-                    // This is not a real firestore operation, we'll use addDoc which auto-generates an ID
-                    // For more predictable URLs, we'd use setDoc with a custom ID (the slug).
-                    // Example: await setDoc(doc(db, "blog", newSlug), newPostData);
-                    await addDoc(collection(db, "blog"), newPostData);
+                    delete newPostData.slug;
+                    // Use setDoc to create a document with a specific ID (our slug)
+                    await setDoc(doc(db, "blog", newSlug), newPostData);
                 }
             } else if (activeTab === 'resources') {
                 const resourceData = { ...formData };
