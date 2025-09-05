@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,15 +61,18 @@ import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource } from "@/lib/types";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
+import { updateAdminCredentials } from "@/lib/actions";
 
 
-type ItemType = 'courses' | 'blog' | 'resources';
+type ItemType = 'courses' | 'blog' | 'resources' | 'settings';
 
 export default function AdminDashboardPage() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
+    const { toast } = useToast();
 
     const fetchData = async () => {
         setLoading(true);
@@ -91,6 +94,7 @@ export default function AdminDashboardPage() {
 
         } catch (error) {
             console.error("Error fetching data: ", error);
+             toast({ title: "Error", description: "Could not fetch data.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -107,6 +111,13 @@ export default function AdminDashboardPage() {
     const [editingItem, setEditingItem] = useState<Course | BlogPost | Resource | null>(null);
     const [formData, setFormData] = useState<any>({});
     const [activeTab, setActiveTab] = useState<ItemType>('courses');
+    
+    const [settingsFormData, setSettingsFormData] = useState({
+        currentPassword: '',
+        newEmail: '',
+        newPassword: '',
+        confirmNewPassword: ''
+    });
 
     const openConfirmationDialog = (type: ItemType, id: string) => {
         setItemToDelete({ type, id });
@@ -122,8 +133,10 @@ export default function AdminDashboardPage() {
             if (type === 'blog') await deleteDoc(doc(db, "blog", id));
             if (type === 'resources') await deleteDoc(doc(db, "resources", id));
             await fetchData(); // Refetch all data
+            toast({ title: "Success", description: "Item deleted successfully." });
         } catch (error) {
             console.error("Error deleting document: ", error);
+             toast({ title: "Error", description: "Could not delete item.", variant: "destructive" });
         }
 
         setDialogOpen(false);
@@ -155,14 +168,15 @@ export default function AdminDashboardPage() {
       if (!title) return '';
       return title
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters
+        .replace(/[^a-z0-9\\s-]/g, '') // remove non-alphanumeric characters
         .trim()
-        .replace(/\s+/g, '-') // replace spaces with hyphens
+        .replace(/\\s+/g, '-') // replace spaces with hyphens
         .replace(/-+/g, '-'); // remove consecutive hyphens
     };
 
     const convertToDirectDownloadLink = (url: string): string => {
-        const gDriveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)\/view\?usp=sharing/;
+        if (!url) return url;
+        const gDriveRegex = /https:\\/\\/drive\\.google\\.com\\/file\\/d\\/([a-zA-Z0-9_-]+)/;
         const match = url.match(gDriveRegex);
         if (match && match[1]) {
             const fileId = match[1];
@@ -196,13 +210,11 @@ export default function AdminDashboardPage() {
                     const newSlug = createSlug(formData.title);
                     if (!newSlug) {
                         console.error("Cannot create blog post without a title.");
-                        // Optionally, show an error to the user
+                        toast({ title: "Error", description: "Blog post must have a title.", variant: "destructive" });
                         return;
                     }
                     const newPostData = { ...blogData };
-                    // We don't save slug in the document, it's the document ID
                     delete newPostData.slug;
-                    // Use setDoc to create a document with a specific ID (our slug)
                     await setDoc(doc(db, "blog", newSlug), newPostData);
                 }
             } else if (activeTab === 'resources') {
@@ -219,14 +231,51 @@ export default function AdminDashboardPage() {
                 }
             }
             await fetchData(); // Refetch data
+            toast({ title: "Success", description: "Data saved successfully." });
         } catch(error) {
             console.error("Error saving document: ", error);
+             toast({ title: "Error", description: "Could not save data.", variant: "destructive" });
         }
 
         setIsFormOpen(false);
         setEditingItem(null);
         setFormData({});
     };
+
+    const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setSettingsFormData({ ...settingsFormData, [name]: value });
+    };
+
+    const handleSettingsSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const { currentPassword, newEmail, newPassword, confirmNewPassword } = settingsFormData;
+
+        if (newPassword && newPassword !== confirmNewPassword) {
+            toast({ title: "Error", description: "New passwords do not match.", variant: "destructive" });
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('currentPassword', currentPassword);
+        if (newEmail) formData.append('newEmail', newEmail);
+        if (newPassword) formData.append('newPassword', newPassword);
+
+        const result = await updateAdminCredentials(formData);
+
+        if (result.success) {
+            toast({ title: "Success", description: result.message });
+            setSettingsFormData({
+                currentPassword: '',
+                newEmail: '',
+                newPassword: '',
+                confirmNewPassword: ''
+            });
+        } else {
+            toast({ title: "Error", description: result.message, variant: "destructive" });
+        }
+    };
+
 
     const renderFormFields = () => {
         switch(activeTab) {
@@ -328,14 +377,17 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
                                 <TabsTrigger value="blog">Blog Posts</TabsTrigger>
                                 <TabsTrigger value="resources">Resources</TabsTrigger>
+                                <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
                             </TabsList>
-                            <div className="ml-auto flex items-center gap-2">
+                             <div className="ml-auto flex items-center gap-2">
+                                {activeTab !== 'settings' && (
                                 <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                                         Add New
                                     </span>
                                 </Button>
+                                )}
                             </div>
                         </div>
                         <TabsContent value="courses">
@@ -494,6 +546,35 @@ export default function AdminDashboardPage() {
                                         </TableBody>
                                     </Table>
                                      }
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="settings">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Admin Settings</CardTitle>
+                                    <CardDescription>Update your administrator credentials.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <form onSubmit={handleSettingsSubmit} className="space-y-4 max-w-md">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="newEmail">Admin Email</Label>
+                                            <Input id="newEmail" name="newEmail" type="email" placeholder="new.admin@example.com" value={settingsFormData.newEmail} onChange={handleSettingsChange}/>
+                                        </div>
+                                         <div className="grid gap-2">
+                                            <Label htmlFor="currentPassword">Current Password</Label>
+                                            <Input id="currentPassword" name="currentPassword" type="password" required value={settingsFormData.currentPassword} onChange={handleSettingsChange}/>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="newPassword">New Password</Label>
+                                            <Input id="newPassword" name="newPassword" type="password" placeholder="Leave blank to keep current password" value={settingsFormData.newPassword} onChange={handleSettingsChange}/>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                                            <Input id="confirmNewPassword" name="confirmNewPassword" type="password" value={settingsFormData.confirmNewPassword} onChange={handleSettingsChange}/>
+                                        </div>
+                                        <Button type="submit">Update Settings</Button>
+                                    </form>
                                 </CardContent>
                             </Card>
                         </TabsContent>

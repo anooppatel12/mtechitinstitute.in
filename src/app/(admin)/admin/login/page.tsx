@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,11 +10,12 @@ import { Label } from "@/components/ui/label";
 import Logo from "@/components/logo";
 import { useToast } from "@/hooks/use-toast";
 import { generateOtp } from "@/ai/flows/generate-otp-flow";
+import { verifyAdminCredentials } from "@/lib/actions";
 
 export default function AdminLoginPage() {
   const [step, setStep] = useState('credentials'); // 'credentials' or 'otp'
-  const [email, setEmail] = useState('admin@mtech.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [generatedOtp, setGeneratedOtp] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,18 +26,22 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Basic validation
-    if (email !== 'admin@mtech.com' || password !== 'password') {
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+
+    const result = await verifyAdminCredentials(formData);
+
+    if (!result.success) {
       toast({
         title: "Invalid Credentials",
-        description: "Please check your email and password.",
+        description: result.message,
         variant: "destructive",
       });
       setIsLoading(false);
       return;
     }
     
-    // Credentials are correct, generate and "send" OTP
     try {
       const otpResponse = await generateOtp({ email });
       setGeneratedOtp(otpResponse.otp);
@@ -67,6 +71,7 @@ export default function AdminLoginPage() {
             title: "Login Successful",
             description: "Redirecting to dashboard...",
         });
+        // In a real app, you'd set a secure session/cookie here
         router.push('/admin/dashboard');
     } else {
         toast({
