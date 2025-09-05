@@ -161,6 +161,16 @@ export default function AdminDashboardPage() {
         .replace(/-+/g, '-'); // remove consecutive hyphens
     };
 
+    const convertToDirectDownloadLink = (url: string): string => {
+        const gDriveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)\/view\?usp=sharing/;
+        const match = url.match(gDriveRegex);
+        if (match && match[1]) {
+            const fileId = match[1];
+            return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        }
+        return url; // Return original URL if it doesn't match
+    };
+
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -197,6 +207,9 @@ export default function AdminDashboardPage() {
                 }
             } else if (activeTab === 'resources') {
                 const resourceData = { ...formData };
+                if (resourceData.fileUrl) {
+                    resourceData.fileUrl = convertToDirectDownloadLink(resourceData.fileUrl);
+                }
                 delete resourceData.id;
                  if (editingItem) {
                     const resourceDoc = doc(db, "resources", (editingItem as Resource).id);
@@ -285,7 +298,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="fileUrl">File URL</Label>
-                        <Input id="fileUrl" name="fileUrl" value={formData.fileUrl || ''} onChange={handleFormChange} placeholder="https://example.com/file.pdf"/>
+                        <Input id="fileUrl" name="fileUrl" value={formData.fileUrl || ''} onChange={handleFormChange} placeholder="https://drive.google.com/file/d/..."/>
                     </div>
                 </>
             );
