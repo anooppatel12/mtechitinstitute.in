@@ -8,6 +8,5 @@
  * - Only users who authenticate with a phone number from this list will be granted access.
  */
 export const authorizedAdminPhoneNumbers: string[] = [
-    // TODO: Replace with your actual admin phone number(s) in E.164 format
-    // Example: "+919876543210",
+    "+918176875488",
 ];
