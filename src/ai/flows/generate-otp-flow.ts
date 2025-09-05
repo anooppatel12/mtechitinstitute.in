@@ -55,7 +55,7 @@ const generateOtpFlow = ai.defineFlow(
     } else {
         const msg = {
             to: input.email,
-            from: 'admin@mtechitinstitute.com', // Use a verified sender email in your SendGrid account
+            from: 'anooppbh8@gmail.com', // Use a verified sender email in your SendGrid account
             subject: 'Your MTech IT Institute Login OTP',
             html: `<div style="font-family: sans-serif; text-align: center; padding: 20px;">
                      <h2>MTech IT Institute Admin Login</h2>
