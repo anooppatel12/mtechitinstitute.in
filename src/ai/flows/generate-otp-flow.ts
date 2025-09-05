@@ -1,80 +1,51 @@
-
 'use server';
 
 /**
- * @fileOverview An OTP generation and email sending AI agent.
+ * @fileOverview A blog article summarization AI agent.
  *
- * - generateOtp - A function that generates a one-time password and sends it via email.
- * - GenerateOtpInput - The input type for the generateOtp function.
- * - GenerateOtpOutput - The return type for the generateOtp function.
+ * - summarizeBlogArticle - A function that generates a short summary of a blog article.
+ * - SummarizeBlogArticleInput - The input type for the summarizeBlogArticle function.
+ * - SummarizeBlogArticleOutput - The return type for the summarizeBlogArticle function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import sgMail from '@sendgrid/mail';
 
-if (process.env.SENDGRID_API_KEY) {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const SummarizeBlogArticleInputSchema = z.object({
+  articleContent: z
+    .string()
+    .describe('The full text content of the blog article to summarize.'),
+});
+export type SummarizeBlogArticleInput = z.infer<typeof SummarizeBlogArticleInputSchema>;
+
+const SummarizeBlogArticleOutputSchema = z.object({
+  summary: z
+    .string()
+    .describe('A short, concise summary of the blog article content.'),
+});
+export type SummarizeBlogArticleOutput = z.infer<typeof SummarizeBlogArticleOutputSchema>;
+
+export async function summarizeBlogArticle(
+  input: SummarizeBlogArticleInput
+): Promise<SummarizeBlogArticleOutput> {
+  return summarizeBlogArticleFlow(input);
 }
 
-
-const GenerateOtpInputSchema = z.object({
-  email: z.string().email().describe('The email address to send the OTP to.'),
+const prompt = ai.definePrompt({
+  name: 'summarizeBlogArticlePrompt',
+  input: {schema: SummarizeBlogArticleInputSchema},
+  output: {schema: SummarizeBlogArticleOutputSchema},
+  prompt: `Summarize the following blog article in a concise paragraph. The summary should capture the main points and provide a quick overview of the article's content.\n\nArticle:\n{{{articleContent}}}`,
 });
-export type GenerateOtpInput = z.infer<typeof GenerateOtpInputSchema>;
 
-const GenerateOtpOutputSchema = z.object({
-  otp: z.string().length(6).describe('The 6-digit one-time password.'),
-});
-export type GenerateOtpOutput = z.infer<typeof GenerateOtpOutputSchema>;
-
-
-export async function generateOtp(
-  input: GenerateOtpInput
-): Promise<GenerateOtpOutput> {
-  return generateOtpFlow(input);
-}
-
-
-const generateOtpFlow = ai.defineFlow(
+const summarizeBlogArticleFlow = ai.defineFlow(
   {
-    name: 'generateOtpFlow',
-    inputSchema: GenerateOtpInputSchema,
-    outputSchema: GenerateOtpOutputSchema,
+    name: 'summarizeBlogArticleFlow',
+    inputSchema: SummarizeBlogArticleInputSchema,
+    outputSchema: SummarizeBlogArticleOutputSchema,
   },
-  async (input) => {
-    
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    console.log(`Generated OTP for ${input.email}: ${otp}`);
-
-    if (!process.env.SENDGRID_API_KEY) {
-        console.error("SendGrid API Key not found. Skipping email.");
-        // In a real app, you'd want to handle this more gracefully.
-        // For the prototype, we can proceed without email for local testing.
-    } else {
-        const msg = {
-            to: input.email,
-            from: 'anooppbh8@gmail.com', // Use a verified sender email in your SendGrid account
-            subject: 'Your MTech IT Institute Login OTP',
-            html: `<div style="font-family: sans-serif; text-align: center; padding: 20px;">
-                     <h2>MTech IT Institute Admin Login</h2>
-                     <p>Your One-Time Password (OTP) is:</p>
-                     <p style="font-size: 24px; font-weight: bold; letter-spacing: 4px; border: 1px solid #ccc; padding: 10px; display: inline-block;">${otp}</p>
-                     <p>This code will expire in 5 minutes.</p>
-                   </div>`,
-        };
-
-        try {
-            await sgMail.send(msg);
-            console.log(`OTP email sent to ${input.email}`);
-        } catch (error) {
-            console.error('Error sending email:', error);
-            // It's important to decide if the flow should fail if the email doesn't send.
-            // For now, we'll log the error but still return the OTP.
-        }
-    }
-
-    return { otp };
+  async input => {
+    const {output} = await prompt(input);
+    return output!;
   }
 );

@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,17 +63,29 @@ import type { Course, BlogPost, Resource } from "@/lib/types";
 import { db, auth } from "@/lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { onAuthStateChanged, signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { useRouter } from "next/navigation";
 
 
 type ItemType = 'courses' | 'blog' | 'resources' | 'settings';
 
 export default function AdminDashboardPage() {
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-    const [resources, setResources] = useState<Resource[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [user, authLoading, authError] = useAuthState(auth);
+    const router = useRouter();
+    const [courses, setCourses = useState<Course[]>([]);
+    const [blogPosts, setBlogPosts = useState<BlogPost[]>([]);
+    const [resources, setResources = useState<Resource[]>([]);
+    const [loading, setLoading = useState(true);
     const { toast } = useToast();
+
+    useEffect(() => {
+        if (authLoading) return; // Wait until auth state is loaded
+        if (!user) {
+            router.push('/admin/login'); // Redirect if not logged in
+        } else {
+            fetchData();
+        }
+    }, [user, authLoading, router]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -100,29 +113,15 @@ export default function AdminDashboardPage() {
         }
     };
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in.
-                fetchData();
-            } else {
-                // User is signed out.
-                // Redirect to login page if you want to protect this route
-            }
-        });
-        // Cleanup subscription on unmount
-        return () => unsubscribe();
-    }, []);
+    const [dialogOpen, setDialogOpen = useState(false);
+    const [itemToDelete, setItemToDelete = useState<{type: ItemType, id: string} | null>(null);
 
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<{type: ItemType, id: string} | null>(null);
-
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<Course | BlogPost | Resource | null>(null);
-    const [formData, setFormData] = useState<any>({});
-    const [activeTab, setActiveTab] = useState<ItemType>('courses');
+    const [isFormOpen, setIsFormOpen = useState(false);
+    const [editingItem, setEditingItem = useState<Course | BlogPost | Resource | null>(null);
+    const [formData, setFormData = useState<any>({});
+    const [activeTab, setActiveTab = useState<ItemType>('courses');
     
-    const [settingsFormData, setSettingsFormData] = useState({
+    const [settingsFormData, setSettingsFormData = useState({
         currentPassword: '',
         newEmail: '',
         newPassword: '',
@@ -408,11 +407,9 @@ export default function AdminDashboardPage() {
                 <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
                     <Logo />
                     <div className="ml-auto">
-                        <Button variant="outline" size="icon" asChild onClick={() => signOut(auth)}>
-                            <Link href="/admin/login">
-                                <LogOut className="h-4 w-4" />
-                                <span className="sr-only">Logout</span>
-                            </Link>
+                        <Button variant="outline" size="icon" onClick={() => signOut(auth)}>
+                           <LogOut className="h-4 w-4" />
+                           <span className="sr-only">Logout</span>
                         </Button>
                     </div>
                 </header>
@@ -599,7 +596,7 @@ export default function AdminDashboardPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Admin Settings</CardTitle>
-                                    <CardDescription>Update your administrator credentials.</CardDescription>
+                                    <CardDescription>Update your administrator credentials. Note: Phone number cannot be changed.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <form onSubmit={handleSettingsSubmit} className="space-y-4 max-w-md">

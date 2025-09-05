@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect }from "react";
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,57 +9,77 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "@/components/logo";
 import { useToast } from "@/hooks/use-toast";
-import { generateOtp } from "@/ai/flows/generate-otp-flow";
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
+import { authorizedAdminPhoneNumbers } from "@/lib/authorized-admins";
 
 
 export default function AdminLoginPage() {
-  const [step, setStep] = useState('credentials'); // 'credentials' or 'otp'
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
-  const [generatedOtp, setGeneratedOtp] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult = useState<ConfirmationResult | null>(null);
+  const [isLoading, setIsLoading = useState(false);
+  const [step, setStep = useState<'phone' | 'otp'>('phone');
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleCredentialSubmit = async (e: React.FormEvent) => {
+  // Set up reCAPTCHA verifier
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': (response: any) => {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+                console.log("reCAPTCHA solved");
+            }
+        });
+    }
+  }, []);
+
+
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!phoneNumber) {
+        toast({ title: "Error", description: "Please enter a phone number.", variant: "destructive" });
+        setIsLoading(false);
+        return;
+    }
+    
+    if (!authorizedAdminPhoneNumbers.includes(phoneNumber)) {
+        toast({ title: "Unauthorized", description: "This phone number is not authorized for admin access.", variant: "destructive" });
+        setIsLoading(false);
+        return;
+    }
+
     try {
-        await signInWithEmailAndPassword(auth, email, password);
-        
-        // If sign-in is successful, proceed to OTP generation
-        const otpResponse = await generateOtp({ email });
-        setGeneratedOtp(otpResponse.otp);
+        const verifier = window.recaptchaVerifier;
+        const result = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+        setConfirmationResult(result);
         setStep('otp');
         toast({
             title: "OTP Sent",
-            description: `An OTP has been sent to your email.`,
+            description: `An OTP has been sent to ${phoneNumber}.`,
         });
-
     } catch (error: any) {
-        let errorMessage = "An unknown error occurred.";
-        if (error.code) {
+         let errorMessage = "An unknown error occurred.";
+         if (error.code) {
             switch (error.code) {
-                case 'auth/user-not-found':
-                case 'auth/wrong-password':
-                case 'auth/invalid-credential':
-                    errorMessage = 'Invalid email or password.';
+                case 'auth/invalid-phone-number':
+                    errorMessage = 'The phone number is not valid.';
                     break;
-                case 'auth/invalid-email':
-                    errorMessage = 'Please enter a valid email address.';
-                    break;
+                case 'auth/too-many-requests':
+                     errorMessage = 'Too many requests. Please try again later.';
+                     break;
                 default:
-                    errorMessage = 'An error occurred during login. Please try again.';
+                    errorMessage = 'Failed to send OTP. Please check the number and try again.';
                     break;
             }
         }
-        console.error("Firebase Auth Error:", error);
+        console.error("Firebase Phone Auth Error:", error);
         toast({
-            title: "Login Failed",
+            title: "Failed to Send OTP",
             description: errorMessage,
             variant: "destructive",
         });
@@ -68,30 +88,49 @@ export default function AdminLoginPage() {
     }
   };
   
-  const handleOtpSubmit = (e: React.FormEvent) => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    if (otp === generatedOtp) {
+    if (!confirmationResult) {
+        toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+        setIsLoading(false);
+        return;
+    }
+
+    try {
+        await confirmationResult.confirm(otp);
         toast({
             title: "Login Successful",
             description: "Redirecting to dashboard...",
         });
         router.push('/admin/dashboard');
-    } else {
+
+    } catch (error: any) {
+        let errorMessage = "An unknown error occurred.";
+        if (error.code) {
+            switch (error.code) {
+                case 'auth/invalid-verification-code':
+                    errorMessage = 'The OTP you entered is incorrect.';
+                    break;
+                 case 'auth/code-expired':
+                    errorMessage = 'The OTP has expired. Please request a new one.';
+                    break;
+                default:
+                    errorMessage = 'Failed to verify OTP. Please try again.';
+                    break;
+            }
+        }
+        console.error("Firebase OTP Verification Error:", error);
         toast({
             title: "Invalid OTP",
-            description: "The OTP you entered is incorrect.",
+            description: errorMessage,
             variant: "destructive",
         });
         setIsLoading(false);
     }
   };
   
-  const handleLogoutAndBack = async () => {
-    await signOut(auth);
-    setStep('credentials');
-  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary">
@@ -100,46 +139,29 @@ export default function AdminLoginPage() {
             <div className="flex justify-center mb-4">
               <Logo />
             </div>
-            {step === 'credentials' ? (
-                <>
-                    <CardTitle className="text-2xl font-headline">Admin Login</CardTitle>
-                    <CardDescription>Enter your credentials to access the dashboard</CardDescription>
-                </>
+             <CardTitle className="text-2xl font-headline">Admin Login</CardTitle>
+            {step === 'phone' ? (
+                <CardDescription>Enter your phone number to receive an OTP</CardDescription>
             ) : (
-                 <>
-                    <CardTitle className="text-2xl font-headline">Enter OTP</CardTitle>
-                    <CardDescription>Check your email for the verification code.</CardDescription>
-                </>
+                <CardDescription>Check your phone for the verification code.</CardDescription>
             )}
         </CardHeader>
         <CardContent>
-          {step === 'credentials' ? (
-            <form onSubmit={handleCredentialSubmit} className="grid gap-4" autoComplete="off">
+          {step === 'phone' ? (
+            <form onSubmit={handlePhoneSubmit} className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="m@example.com" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="phone" 
+                  type="tel" 
+                  placeholder="+919876543210" 
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   required 
-                  autoComplete="off"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required 
-                  autoComplete="new-password"
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Verifying...' : 'Login'}
+                {isLoading ? 'Sending OTP...' : 'Send OTP'}
               </Button>
             </form>
           ) : (
@@ -149,23 +171,32 @@ export default function AdminLoginPage() {
                     <Input 
                         id="otp" 
                         type="text" 
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
                         value={otp}
                         onChange={(e) => setOtp(e.target.value)}
                         placeholder="123456" 
                         required 
-                        autoComplete="off"
                     />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                    {isLoading ? 'Verifying...' : 'Verify OTP'}
                 </Button>
-                 <Button variant="link" size="sm" onClick={handleLogoutAndBack}>
-                    Back to login
+                 <Button variant="link" size="sm" onClick={() => setStep('phone')}>
+                    Use a different number
                 </Button>
             </form>
           )}
         </CardContent>
       </Card>
+      <div id="recaptcha-container"></div>
     </div>
   );
+}
+
+// Extend the Window interface to include the reCAPTCHA verifier
+declare global {
+  interface Window {
+    recaptchaVerifier: RecaptchaVerifier;
+  }
 }

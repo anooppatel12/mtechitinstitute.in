@@ -18,4 +18,10 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// This is needed for phone auth to work with app check
+if (typeof window !== "undefined") {
+    // @ts-ignore
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+}
+
 export { app, db, auth };
