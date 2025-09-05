@@ -1,10 +1,23 @@
+
 import Link from "next/link";
-import { courses } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import CourseCard from "@/components/course-card";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, limit, query } from "firebase/firestore";
+import type { Course } from "@/lib/types";
 
-export default function FeaturedCourses() {
-  const featuredCourses = courses.slice(0, 3);
+// This forces the component to be dynamically rendered
+export const revalidate = 0;
+
+async function getFeaturedCourses(): Promise<Course[]> {
+    const coursesQuery = query(collection(db, "courses"), limit(3));
+    const courseSnapshot = await getDocs(coursesQuery);
+    const courseList = courseSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
+    return courseList;
+}
+
+export default async function FeaturedCourses() {
+  const featuredCourses = await getFeaturedCourses();
 
   return (
     <section className="py-16 sm:py-24 bg-background">

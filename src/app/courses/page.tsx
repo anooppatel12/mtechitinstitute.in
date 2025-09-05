@@ -1,5 +1,4 @@
 
-import { courses } from "@/lib/data";
 import {
   Accordion,
   AccordionContent,
@@ -10,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, IndianRupee, BookOpen } from "lucide-react";
 import Image from "next/image";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import type { Course } from "@/lib/types";
 
 export const metadata = {
   title: "Our Courses",
@@ -19,7 +21,16 @@ export const metadata = {
 // This forces the page to be dynamically rendered
 export const revalidate = 0;
 
-export default function CoursesPage() {
+async function getCourses(): Promise<Course[]> {
+    const coursesCollection = collection(db, "courses");
+    const courseSnapshot = await getDocs(coursesCollection);
+    const courseList = courseSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
+    return courseList;
+}
+
+export default async function CoursesPage() {
+  const courses = await getCourses();
+
   return (
     <div className="bg-background">
       <div className="container py-16 sm:py-24">
@@ -37,7 +48,7 @@ export default function CoursesPage() {
                 <Image
                   src={course.image}
                   alt={course.title}
-                  data-ai-hint={course.id.split('-').slice(0,2).join(' ')}
+                  data-ai-hint={course.title.split(' ').slice(0,2).join(' ').toLowerCase()}
                   fill
                   className="object-cover"
                 />

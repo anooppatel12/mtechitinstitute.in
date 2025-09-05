@@ -1,9 +1,10 @@
 
-import { blogPosts } from "@/lib/data";
 import BlogCard from "@/components/blog-card";
 import AdPlaceholder from "@/components/ad-placeholder";
 import type { BlogPost } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 export const metadata = {
   title: "Blog",
@@ -13,17 +14,25 @@ export const metadata = {
 // This forces the page to be dynamically rendered
 export const revalidate = 0;
 
-function getPostsWithSnippets(): BlogPost[] {
-    return blogPosts.map(post => {
-        const snippet = post.content.replace(/<[^>]+>/g, '').substring(0, 150);
-        return { ...post, summary: `${snippet}...` };
+async function getPosts(): Promise<{ posts: BlogPost[], allTags: string[] }> {
+    const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
+    const blogSnapshot = await getDocs(blogQuery);
+    const posts = blogSnapshot.docs.map(doc => {
+        const data = doc.data() as Omit<BlogPost, 'slug' | 'summary'>;
+        const snippet = data.content.replace(/<[^>]+>/g, '').substring(0, 150);
+        return { 
+            ...data, 
+            slug: doc.id,
+            summary: `${snippet}...` 
+        } as BlogPost;
     });
+
+    const allTags = [...new Set(posts.flatMap(p => p.tags || []))];
+    return { posts, allTags };
 }
 
-const allTags = [...new Set(blogPosts.flatMap(p => p.tags))];
-
 export default async function BlogPage() {
-  const posts = getPostsWithSnippets();
+  const { posts, allTags } = await getPosts();
 
   return (
     <div className="bg-secondary">

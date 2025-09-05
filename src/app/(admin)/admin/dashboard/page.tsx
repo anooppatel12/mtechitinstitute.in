@@ -56,12 +56,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { blogPosts as initialBlogPosts, resources as initialResources } from "@/lib/data";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource } from "@/lib/types";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 
 
 type ItemType = 'courses' | 'blog' | 'resources';
@@ -72,18 +71,33 @@ export default function AdminDashboardPage() {
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchCourses = async () => {
+    const fetchData = async () => {
+        setLoading(true);
+        try {
             const coursesCollection = collection(db, "courses");
             const courseSnapshot = await getDocs(coursesCollection);
             const courseList = courseSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
             setCourses(courseList);
-        };
 
-        fetchCourses();
-        setBlogPosts(initialBlogPosts);
-        setResources(initialResources);
-        setLoading(false);
+            const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
+            const blogSnapshot = await getDocs(blogQuery);
+            const blogList = blogSnapshot.docs.map(doc => ({ ...doc.data(), slug: doc.id } as BlogPost));
+            setBlogPosts(blogList);
+
+            const resourcesCollection = collection(db, "resources");
+            const resourceSnapshot = await getDocs(resourcesCollection);
+            const resourceList = resourceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Resource));
+            setResources(resourceList);
+
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
     }, []);
 
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -102,12 +116,16 @@ export default function AdminDashboardPage() {
     const handleDelete = async () => {
         if (!itemToDelete) return;
         const { type, id } = itemToDelete;
-        if (type === 'courses') {
-            await deleteDoc(doc(db, "courses", id));
-            setCourses(courses.filter(c => c.id !== id));
+        
+        try {
+            if (type === 'courses') await deleteDoc(doc(db, "courses", id));
+            if (type === 'blog') await deleteDoc(doc(db, "blog", id));
+            if (type === 'resources') await deleteDoc(doc(db, "resources", id));
+            await fetchData(); // Refetch all data
+        } catch (error) {
+            console.error("Error deleting document: ", error);
         }
-        if (type === 'blog') setBlogPosts(blogPosts.filter(b => b.slug !== id)); // TODO: Firestore
-        if (type === 'resources') setResources(resources.filter(r => r.id !== id)); // TODO: Firestore
+
         setDialogOpen(false);
         setItemToDelete(null);
     };
@@ -132,45 +150,65 @@ export default function AdminDashboardPage() {
             setFormData({ ...formData, [name]: value });
         }
     };
+    
+    const createSlug = (title: string) => {
+      return title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // remove non-alphanumeric characters
+        .trim()
+        .replace(/\s+/g, '-') // replace spaces with hyphens
+        .replace(/-+/g, '-'); // remove consecutive hyphens
+    };
+
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (activeTab === 'courses') {
-            const courseData = {
-                ...formData,
-                image: formData.image || 'https://picsum.photos/seed/new-course/600/400'
-            };
-            if (editingItem) { // Update existing item
-                const courseDoc = doc(db, "courses", (editingItem as Course).id);
-                await updateDoc(courseDoc, courseData);
-                setCourses(courses.map(c => c.id === (editingItem as Course).id ? { ...c, ...courseData } : c));
-            } else { // Add new item
-                const docRef = await addDoc(collection(db, "courses"), courseData);
-                setCourses([{ ...courseData, id: docRef.id }, ...courses]);
+        
+        try {
+            if (activeTab === 'courses') {
+                const courseData = { ...formData, image: formData.image || `https://picsum.photos/seed/${formData.title || 'course'}/600/400` };
+                delete courseData.id;
+                if (editingItem) {
+                    const courseDoc = doc(db, "courses", (editingItem as Course).id);
+                    await updateDoc(courseDoc, courseData);
+                } else {
+                    await addDoc(collection(db, "courses"), courseData);
+                }
+            } else if (activeTab === 'blog') {
+                const blogData = { ...formData, image: formData.image || `https://picsum.photos/seed/${formData.title || 'blog'}/800/450` };
+                if (editingItem) {
+                    const slug = (editingItem as BlogPost).slug;
+                    delete blogData.slug;
+                    const blogDoc = doc(db, "blog", slug);
+                    await updateDoc(blogDoc, blogData);
+                } else {
+                    const newSlug = createSlug(formData.title);
+                    const newPostData = { ...formData };
+                    // We don't save slug in the document, it's the document ID
+                    delete newPostData.slug; 
+                    // This is not a real firestore operation, we'll use addDoc which auto-generates an ID
+                    // For more predictable URLs, we'd use setDoc with a custom ID (the slug).
+                    // Example: await setDoc(doc(db, "blog", newSlug), newPostData);
+                    await addDoc(collection(db, "blog"), newPostData);
+                }
+            } else if (activeTab === 'resources') {
+                const resourceData = { ...formData };
+                delete resourceData.id;
+                 if (editingItem) {
+                    const resourceDoc = doc(db, "resources", (editingItem as Resource).id);
+                    await updateDoc(resourceDoc, resourceData);
+                } else {
+                    await addDoc(collection(db, "resources"), resourceData);
+                }
             }
-        }
-        // TODO: Handle Blog and Resources with Firestore
-        if (activeTab === 'blog') {
-            const getNewId = (prefix: string) => `${prefix}-${Date.now()}`;
-            if (editingItem) {
-                setBlogPosts(blogPosts.map(b => b.slug === (editingItem as BlogPost).slug ? formData : b));
-            } else {
-                const newPost: BlogPost = { ...formData, slug: getNewId('blog'), image: 'https://picsum.photos/seed/new-post/800/450' };
-                setBlogPosts([newPost, ...blogPosts]);
-            }
-        }
-        if (activeTab === 'resources') {
-             const getNewId = (prefix: string) => `${prefix}-${Date.now()}`;
-            if (editingItem) {
-                setResources(resources.map(r => r.id === (editingItem as Resource).id ? formData : r));
-            } else {
-                const newResource: Resource = { ...formData, id: getNewId('resource') };
-                setResources([newResource, ...resources]);
-            }
+            await fetchData(); // Refetch data
+        } catch(error) {
+            console.error("Error saving document: ", error);
         }
 
         setIsFormOpen(false);
+        setEditingItem(null);
+        setFormData({});
     };
 
     const renderFormFields = () => {
@@ -345,6 +383,7 @@ export default function AdminDashboardPage() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
+                                     {loading ? <p>Loading blog posts...</p> :
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
@@ -384,6 +423,7 @@ export default function AdminDashboardPage() {
                                             ))}
                                         </TableBody>
                                     </Table>
+                                    }
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -396,6 +436,7 @@ export default function AdminDashboardPage() {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
+                                     {loading ? <p>Loading resources...</p> :
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
@@ -435,6 +476,7 @@ export default function AdminDashboardPage() {
                                             ))}
                                         </TableBody>
                                     </Table>
+                                     }
                                 </CardContent>
                             </Card>
                         </TabsContent>
@@ -461,9 +503,9 @@ export default function AdminDashboardPage() {
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
                 <DialogContent className="sm:max-w-[425px] md:max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editingItem ? `Edit ${activeTab}` : `Add New ${activeTab}`}</DialogTitle>
+                        <DialogTitle>{editingItem ? `Edit ${activeTab.slice(0, -1)}` : `Add New ${activeTab.slice(0, -1)}`}</DialogTitle>
                         <DialogDescription>
-                           {editingItem ? `Make changes to your ${activeTab} here.` : `Add a new ${activeTab} to your site.`} Click save when you're done.
+                           {editingItem ? `Make changes to your ${activeTab.slice(0, -1)} here.` : `Add a new ${activeTab.slice(0, -1)} to your site.`} Click save when you're done.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleFormSubmit}>

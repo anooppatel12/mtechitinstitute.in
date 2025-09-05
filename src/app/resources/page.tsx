@@ -1,13 +1,28 @@
-import { resources } from "@/lib/data";
+
 import ResourceCard from "@/components/resource-card";
 import AdPlaceholder from "@/components/ad-placeholder";
+import type { Resource } from "@/lib/types";
+import { db } from "@/lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export const metadata = {
   title: "Student Resources",
   description: "Download free PDF notes, practice worksheets, and quizzes to supplement your learning.",
 };
 
-export default function ResourcesPage() {
+// This forces the page to be dynamically rendered
+export const revalidate = 0;
+
+async function getResources(): Promise<Resource[]> {
+    const resourcesCollection = collection(db, "resources");
+    const resourceSnapshot = await getDocs(resourcesCollection);
+    const resourceList = resourceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Resource));
+    return resourceList;
+}
+
+export default async function ResourcesPage() {
+  const resources = await getResources();
+
   return (
     <div className="bg-background">
       <div className="container py-16 sm:py-24">
