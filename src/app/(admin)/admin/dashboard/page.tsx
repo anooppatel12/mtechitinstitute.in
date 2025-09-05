@@ -72,10 +72,10 @@ type ItemType = 'courses' | 'blog' | 'resources' | 'settings';
 export default function AdminDashboardPage() {
     const [user, authLoading, authError] = useAuthState(auth);
     const router = useRouter();
-    const [courses, setCourses = useState<Course[]>([]);
-    const [blogPosts, setBlogPosts = useState<BlogPost[]>([]);
-    const [resources, setResources = useState<Resource[]>([]);
-    const [loading, setLoading = useState(true);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+    const [resources, setResources] = useState<Resource[]>([]);
+    const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -113,15 +113,15 @@ export default function AdminDashboardPage() {
         }
     };
 
-    const [dialogOpen, setDialogOpen = useState(false);
-    const [itemToDelete, setItemToDelete = useState<{type: ItemType, id: string} | null>(null);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<{type: ItemType, id: string} | null>(null);
 
-    const [isFormOpen, setIsFormOpen = useState(false);
-    const [editingItem, setEditingItem = useState<Course | BlogPost | Resource | null>(null);
-    const [formData, setFormData = useState<any>({});
-    const [activeTab, setActiveTab = useState<ItemType>('courses');
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<Course | BlogPost | Resource | null>(null);
+    const [formData, setFormData] = useState<any>({});
+    const [activeTab, setActiveTab] = useState<ItemType>('courses');
     
-    const [settingsFormData, setSettingsFormData = useState({
+    const [settingsFormData, setSettingsFormData] = useState({
         currentPassword: '',
         newEmail: '',
         newPassword: '',

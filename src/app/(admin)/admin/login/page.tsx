@@ -17,9 +17,9 @@ import { authorizedAdminPhoneNumbers } from "@/lib/authorized-admins";
 export default function AdminLoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
-  const [confirmationResult, setConfirmationResult = useState<ConfirmationResult | null>(null);
-  const [isLoading, setIsLoading = useState(false);
-  const [step, setStep = useState<'phone' | 'otp'>('phone');
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const { toast } = useToast();
   const router = useRouter();
 
