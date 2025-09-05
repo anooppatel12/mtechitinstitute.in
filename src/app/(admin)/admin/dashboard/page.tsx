@@ -59,10 +59,10 @@ import { Textarea } from "@/components/ui/textarea";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource } from "@/lib/types";
-import { db } from "@/lib/firebase";
+import { db, auth } from "@/lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { updateAdminCredentials } from "@/lib/actions";
+import { onAuthStateChanged, signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 
 type ItemType = 'courses' | 'blog' | 'resources' | 'settings';
@@ -101,7 +101,17 @@ export default function AdminDashboardPage() {
     };
 
     useEffect(() => {
-        fetchData();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in.
+                fetchData();
+            } else {
+                // User is signed out.
+                // Redirect to login page if you want to protect this route
+            }
+        });
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
     }, []);
 
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -256,23 +266,59 @@ export default function AdminDashboardPage() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('currentPassword', currentPassword);
-        if (newEmail) formData.append('newEmail', newEmail);
-        if (newPassword) formData.append('newPassword', newPassword);
+        const user = auth.currentUser;
+        if (!user || !user.email) {
+            toast({ title: "Error", description: "No user is signed in.", variant: "destructive" });
+            return;
+        }
+        
+        try {
+            // Re-authenticate the user before making sensitive changes
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, credential);
 
-        const result = await updateAdminCredentials(formData);
+            // Update email if a new one is provided
+            if (newEmail && newEmail !== user.email) {
+                await updateEmail(user, newEmail);
+                toast({ title: "Success", description: "Email updated successfully." });
+            }
 
-        if (result.success) {
-            toast({ title: "Success", description: result.message });
-            setSettingsFormData({
+            // Update password if a new one is provided
+            if (newPassword) {
+                await updatePassword(user, newPassword);
+                toast({ title: "Success", description: "Password updated successfully." });
+            }
+
+            if (!newEmail && !newPassword) {
+                 toast({ title: "Info", description: "No changes were submitted." });
+            }
+            
+             setSettingsFormData({
                 currentPassword: '',
                 newEmail: '',
                 newPassword: '',
                 confirmNewPassword: ''
             });
-        } else {
-            toast({ title: "Error", description: result.message, variant: "destructive" });
+
+
+        } catch(error: any) {
+            let errorMessage = "An error occurred."
+             if (error.code) {
+                switch (error.code) {
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                        errorMessage = 'Incorrect current password.';
+                        break;
+                     case 'auth/email-already-in-use':
+                        errorMessage = 'This email address is already in use by another account.';
+                        break;
+                    default:
+                        errorMessage = 'Failed to update credentials. Please try again.';
+                        break;
+                }
+            }
+            console.error("Error updating credentials:", error);
+            toast({ title: "Error", description: errorMessage, variant: "destructive" });
         }
     };
 
@@ -362,7 +408,7 @@ export default function AdminDashboardPage() {
                 <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
                     <Logo />
                     <div className="ml-auto">
-                        <Button variant="outline" size="icon" asChild>
+                        <Button variant="outline" size="icon" asChild onClick={() => signOut(auth)}>
                             <Link href="/admin/login">
                                 <LogOut className="h-4 w-4" />
                                 <span className="sr-only">Logout</span>

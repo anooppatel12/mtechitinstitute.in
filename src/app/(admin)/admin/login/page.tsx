@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import Logo from "@/components/logo";
 import { useToast } from "@/hooks/use-toast";
 import { generateOtp } from "@/ai/flows/generate-otp-flow";
-import { verifyAdminCredentials } from "@/lib/actions";
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+
 
 export default function AdminLoginPage() {
   const [step, setStep] = useState('credentials'); // 'credentials' or 'otp'
@@ -26,40 +28,44 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData();
-    formData.append('email', email);
-    formData.append('password', password);
-
-    const result = await verifyAdminCredentials(formData);
-
-    if (!result.success) {
-      toast({
-        title: "Invalid Credentials",
-        description: result.message,
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-    
     try {
-      const otpResponse = await generateOtp({ email });
-      setGeneratedOtp(otpResponse.otp);
-      setStep('otp');
-      toast({
-        title: "OTP Sent",
-        description: `An OTP has been sent to your email. (Hint: It's ${otpResponse.otp})`,
-      });
-    } catch(error) {
-        console.error("OTP Generation failed", error);
+        await signInWithEmailAndPassword(auth, email, password);
+        
+        // If sign-in is successful, proceed to OTP generation
+        const otpResponse = await generateOtp({ email });
+        setGeneratedOtp(otpResponse.otp);
+        setStep('otp');
         toast({
-            title: "Error",
-            description: "Could not generate an OTP. Please try again.",
+            title: "OTP Sent",
+            description: `An OTP has been sent to your email. (Hint: It's ${otpResponse.otp})`,
+        });
+
+    } catch (error: any) {
+        let errorMessage = "An unknown error occurred.";
+        if (error.code) {
+            switch (error.code) {
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                case 'auth/invalid-credential':
+                    errorMessage = 'Invalid email or password.';
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = 'Please enter a valid email address.';
+                    break;
+                default:
+                    errorMessage = 'An error occurred during login. Please try again.';
+                    break;
+            }
+        }
+        console.error("Firebase Auth Error:", error);
+        toast({
+            title: "Login Failed",
+            description: errorMessage,
             variant: "destructive",
         });
+    } finally {
+        setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
   
   const handleOtpSubmit = (e: React.FormEvent) => {
@@ -71,7 +77,6 @@ export default function AdminLoginPage() {
             title: "Login Successful",
             description: "Redirecting to dashboard...",
         });
-        // In a real app, you'd set a secure session/cookie here
         router.push('/admin/dashboard');
     } else {
         toast({
@@ -82,6 +87,11 @@ export default function AdminLoginPage() {
         setIsLoading(false);
     }
   };
+  
+  const handleLogoutAndBack = async () => {
+    await signOut(auth);
+    setStep('credentials');
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-secondary">
@@ -149,7 +159,7 @@ export default function AdminLoginPage() {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                    {isLoading ? 'Verifying...' : 'Verify OTP'}
                 </Button>
-                 <Button variant="link" size="sm" onClick={() => setStep('credentials')}>
+                 <Button variant="link" size="sm" onClick={handleLogoutAndBack}>
                     Back to login
                 </Button>
             </form>
