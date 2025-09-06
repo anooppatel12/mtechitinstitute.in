@@ -28,11 +28,15 @@ if (typeof window !== "undefined") {
 export async function getBlogPostsByCategory(category: string): Promise<BlogPost[]> {
     const blogQuery = query(
         collection(db, "blog"),
-        where("category", "==", category),
-        orderBy("date", "desc")
+        where("category", "==", category)
     );
     const blogSnapshot = await getDocs(blogQuery);
-    return blogSnapshot.docs.map(doc => ({ slug: doc.id, ...doc.data() } as BlogPost));
+    const posts = blogSnapshot.docs.map(doc => ({ slug: doc.id, ...doc.data() } as BlogPost));
+
+    // Sort by date in descending order (newest first)
+    posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    return posts;
 }
 
 
