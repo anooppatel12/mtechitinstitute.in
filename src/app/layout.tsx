@@ -25,6 +25,9 @@ export const metadata: Metadata = {
   },
   description: "Your gateway to excellence in IT training and computer courses. Join us to build your future.",
   keywords: ["IT training", "computer courses", "MS Office", "Excel", "Tally", "web design", "programming"],
+  icons: {
+    icon: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png",
+  }
 };
 
 export default function RootLayout({
