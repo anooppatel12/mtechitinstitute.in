@@ -21,7 +21,7 @@ export default function ContactPreview() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-primary">Address</h3>
-                <p className="text-primary/80">123 Tech Park, Silicon Valley, India</p>
+                <p className="text-primary/80">Patti Pratapgarh, 230135, Uttar Pradesh.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -30,7 +30,7 @@ export default function ContactPreview() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-primary">Phone</h3>
-                <p className="text-primary/80">+91 12345 67890</p>
+                <p className="text-primary/80">7800413348, 8299809562</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -39,7 +39,7 @@ export default function ContactPreview() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-primary">Email</h3>
-                <p className="text-primary/80">contact@mtechitinstitute.com</p>
+                <p className="text-primary/80">mtechitinstitute@gmail.com</p>
               </div>
             </div>
             <div className="pt-4">

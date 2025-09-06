@@ -17,15 +17,15 @@ export default function Footer() {
             <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-accent"/>
-                    <span>123 Tech Park, Silicon Valley, India</span>
+                    <span>Patti Pratapgarh, 230135, Uttar Pradesh.</span>
                 </div>
                  <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-accent"/>
-                    <span>+91 12345 67890</span>
+                    <span>7800413348, 8299809562</span>
                 </div>
                  <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-accent"/>
-                    <span>contact@mtechitinstitute.com</span>
+                    <span>mtechitinstitute@gmail.com</span>
                 </div>
             </div>
           </div>

@@ -41,15 +41,15 @@ export default function ContactPage() {
               <CardContent className="space-y-4 text-sm">
                 <div className="flex items-center gap-3">
                   <MapPin className="h-5 w-5 text-accent" />
-                  <span>123 Tech Park, Silicon Valley, India</span>
+                  <span>Patti Pratapgarh, 230135, Uttar Pradesh.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-accent" />
-                  <span>+91 12345 67890</span>
+                  <span>7800413348, 8299809562</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-accent" />
-                  <span>contact@mtechitinstitute.com</span>
+                  <span>mtechitinstitute@gmail.com</span>
                 </div>
               </CardContent>
             </Card>
