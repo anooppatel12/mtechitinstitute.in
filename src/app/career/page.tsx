@@ -1,36 +1,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, Lightbulb, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import { getBlogPostsByCategory } from "@/lib/firebase";
+import type { BlogPost } from "@/lib/types";
 
 export const metadata = {
   title: "Career Guidance",
-  description: "Explore career paths after 12th, find IT jobs, and learn about freelancing opportunities.",
+  description: "Explore career paths, find IT jobs, and learn about freelancing opportunities.",
 };
 
-const guidanceArticles = [
-    {
-        title: "Choosing the Right Career Path After 12th Grade",
-        description: "A comprehensive guide to help you navigate the options and make an informed decision about your future.",
-        href: "/blog/best-computer-courses-after-12th"
-    },
-    {
-        title: "Top 5 High-Demand IT Jobs in 2024",
-        description: "Discover the most sought-after roles in the tech industry and the skills you need to land them.",
-        href: "#"
-    },
-    {
-        title: "A Beginner's Guide to Starting a Freelancing Career",
-        description: "Learn how to leverage your skills to build a successful freelancing business from scratch.",
-        href: "#"
-    },
-     {
-        title: "How to Build a Portfolio that Gets You Hired",
-        description: "Practical tips and examples for creating a compelling portfolio that showcases your abilities.",
-        href: "#"
-    }
-]
+// This forces the page to be dynamically rendered
+export const revalidate = 0;
 
-export default function CareerPage() {
+export default async function CareerPage() {
+  const guidanceArticles = await getBlogPostsByCategory("Career Guidance");
+
   return (
     <div className="bg-secondary">
       <div className="container py-16 sm:py-24">
@@ -68,18 +52,26 @@ export default function CareerPage() {
         <div>
             <h2 className="font-headline text-3xl font-bold text-primary mb-8 text-center sm:text-left">Guidance Articles</h2>
             <div className="space-y-6">
-                {guidanceArticles.map((article, index) => (
-                    <Card key={index} className="shadow-sm hover:shadow-md transition-shadow">
-                        <CardContent className="p-6">
-                            <h3 className="font-headline text-xl text-primary mb-2">
-                                <Link href={article.href} className="hover:text-accent transition-colors">
-                                    {article.title}
-                                </Link>
-                            </h3>
-                            <p className="text-foreground/80">{article.description}</p>
+                {guidanceArticles.length > 0 ? (
+                    guidanceArticles.map((article) => (
+                        <Card key={article.slug} className="shadow-sm hover:shadow-md transition-shadow">
+                            <CardContent className="p-6">
+                                <h3 className="font-headline text-xl text-primary mb-2">
+                                    <Link href={`/blog/${article.slug}`} className="hover:text-accent transition-colors">
+                                        {article.title}
+                                    </Link>
+                                </h3>
+                                <p className="text-foreground/80 line-clamp-2">{article.content.replace(/<[^>]+>/g, '')}</p>
+                            </CardContent>
+                        </Card>
+                    ))
+                ) : (
+                    <Card>
+                        <CardContent className="p-6 text-center text-muted-foreground">
+                            <p>No guidance articles have been added yet. Check back soon!</p>
                         </CardContent>
                     </Card>
-                ))}
+                )}
             </div>
         </div>
       </div>

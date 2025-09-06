@@ -1,7 +1,8 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import type { BlogPost } from "./types";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,5 +24,16 @@ if (typeof window !== "undefined") {
     // @ts-ignore
     self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
+
+export async function getBlogPostsByCategory(category: string): Promise<BlogPost[]> {
+    const blogQuery = query(
+        collection(db, "blog"),
+        where("category", "==", category),
+        orderBy("date", "desc")
+    );
+    const blogSnapshot = await getDocs(blogQuery);
+    return blogSnapshot.docs.map(doc => ({ slug: doc.id, ...doc.data() } as BlogPost));
+}
+
 
 export { app, db, auth };
