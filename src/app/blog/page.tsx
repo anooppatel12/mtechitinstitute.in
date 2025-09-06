@@ -5,10 +5,29 @@ import type { BlogPost } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-export const metadata = {
-  title: "Blog",
-  description: "Read our latest articles on IT, career guidance, and productivity tips.",
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+
+export const metadata: Metadata = {
+  title: "Tech Blog & Career Guidance After 12th - MTech IT Institute",
+  description: "Read our latest blog articles on IT, technology trends, coding tutorials, and career guidance for students and professionals.",
+  keywords: ["tech blog", "IT articles", "career guidance after 12th", "learn coding", "latest technology trends"],
+  alternates: {
+    canonical: `${siteUrl}/blog`,
+  },
+  openGraph: {
+    title: "Tech Blog & Career Guidance After 12th - MTech IT Institute",
+    description: "Read our latest blog articles on IT, technology trends, coding tutorials, and career guidance for students and professionals.",
+    url: `${siteUrl}/blog`,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Tech Blog & Career Guidance After 12th - MTech IT Institute",
+    description: "Read our latest blog articles on IT, technology trends, coding tutorials, and career guidance for students and professionals.",
+  },
 };
 
 // This forces the page to be dynamically rendered
@@ -38,9 +57,9 @@ export default async function BlogPage() {
     <div className="bg-secondary">
       <div className="container py-16 sm:py-24">
         <div className="text-center mb-12">
-          <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Our Blog</h1>
+          <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Our Tech Blog</h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-primary/80">
-            Insights, tutorials, and career advice from our experts.
+            Find insights, tutorials, and career advice from our IT experts. Stay updated with the latest trends in technology.
           </p>
         </div>
 
@@ -54,10 +73,12 @@ export default async function BlogPage() {
             </main>
             <aside className="lg:col-span-1 space-y-8">
                 <div className="p-6 bg-background rounded-lg shadow-sm">
-                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Tags</h3>
+                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Popular Tags</h3>
                     <div className="flex flex-wrap gap-2">
                         {allTags.map(tag => (
-                            <Badge key={tag} variant="outline">{tag}</Badge>
+                            <Link href={`/blog/tag/${tag}`} key={tag}>
+                                <Badge variant="outline">{tag}</Badge>
+                            </Link>
                         ))}
                     </div>
                 </div>

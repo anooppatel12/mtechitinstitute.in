@@ -10,7 +10,7 @@ export default function ContactPreview() {
         <div className="text-center mb-12">
           <h2 className="font-headline text-3xl font-bold text-primary sm:text-4xl">Get In Touch</h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-primary/80">
-            We're here to help you on your learning journey. Contact us for any queries.
+            We're here to help you on your learning journey. Contact us for any queries about our computer courses.
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -20,7 +20,7 @@ export default function ContactPreview() {
                 <MapPin className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-primary">Address</h3>
+                <h3 className="text-lg font-semibold text-primary">Our Address</h3>
                 <p className="text-primary/80">Patti Pratapgarh, 230135, Uttar Pradesh.</p>
               </div>
             </div>
@@ -29,7 +29,7 @@ export default function ContactPreview() {
                 <Phone className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-primary">Phone</h3>
+                <h3 className="text-lg font-semibold text-primary">Call Us</h3>
                 <p className="text-primary/80">7800413348, 8299809562</p>
               </div>
             </div>
@@ -38,7 +38,7 @@ export default function ContactPreview() {
                 <Mail className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-primary">Email</h3>
+                <h3 className="text-lg font-semibold text-primary">Email Us</h3>
                 <p className="text-primary/80">mtechitinstitute@gmail.com</p>
               </div>
             </div>
@@ -51,7 +51,7 @@ export default function ContactPreview() {
           <div className="rounded-lg overflow-hidden shadow-lg">
             <Image
               src="https://res.cloudinary.com/dzr4xjizf/image/upload/v1757137831/map1_gah3hr.png"
-              alt="Google Map preview"
+              alt="Map showing location of MTech IT Institute"
               data-ai-hint="map location"
               width={800}
               height={600}

@@ -23,7 +23,7 @@ export default function CourseCard({ course }: CourseCardProps) {
         <div className="relative h-48 w-full">
             <Image
                 src={course.image}
-                alt={course.title}
+                alt={`${course.title} course at MTech IT Institute`}
                 data-ai-hint={course.title.split(' ').slice(0,2).join(' ').toLowerCase()}
                 fill
                 className="object-cover"

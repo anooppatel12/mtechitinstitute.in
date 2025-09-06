@@ -23,7 +23,7 @@ export default function BlogCard({ post }: BlogCardProps) {
         <Link href={`/blog/${post.slug}`} className="block relative h-56 w-full">
             <Image
               src={post.image}
-              alt={post.title}
+              alt={`${post.title} - MTech IT Institute Blog`}
               data-ai-hint={post.tags.slice(0, 2).join(' ')}
               fill
               className="object-cover"
@@ -53,7 +53,9 @@ export default function BlogCard({ post }: BlogCardProps) {
       <CardFooter className="p-6 pt-0">
         <div className="flex flex-wrap gap-2">
             {post.tags.map(tag => (
-                <Badge key={tag} variant="secondary">{tag}</Badge>
+                <Link href={`/blog/tag/${tag}`} key={tag}>
+                  <Badge variant="secondary">{tag}</Badge>
+                </Link>
             ))}
         </div>
       </CardFooter>

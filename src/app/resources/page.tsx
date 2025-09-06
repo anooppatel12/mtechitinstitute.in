@@ -15,7 +15,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Metadata } from 'next';
 
+// Although this is a client component, we can't export metadata directly.
+// This should be handled in a parent layout or page if SEO for this page is critical.
+// For now, focusing on schema and functionality.
 
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -69,9 +73,9 @@ export default function ResourcesPage() {
       <div className="bg-background">
         <div className="container py-16 sm:py-24">
           <div className="text-center mb-12">
-            <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Student Resources</h1>
+            <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Free Student Resources</h1>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-foreground/80">
-              Access free materials to support your learning journey with us.
+              Access free materials like PDF notes, worksheets, and quizzes to support your learning journey with us.
             </p>
           </div>
 

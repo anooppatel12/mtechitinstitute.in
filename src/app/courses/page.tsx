@@ -13,10 +13,30 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import type { Course } from "@/lib/types";
 import { EnrollModal } from "@/components/enroll-modal";
+import { courseSchema } from "@/lib/schema";
+import { JsonLd } from "@/components/json-ld";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "Our Courses",
-  description: "Explore our wide range of IT and computer courses. Find details on duration, syllabus, and fees.",
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+
+export const metadata: Metadata = {
+  title: "IT & Computer Courses with Placement - MTech IT Institute",
+  description: "Explore top IT & computer courses like Web Development, Digital Marketing, and Tally. Get expert training and career support at MTech IT Institute.",
+  keywords: ["computer courses", "IT courses", "web development course", "digital marketing course", "Tally course", "job oriented courses"],
+  alternates: {
+    canonical: `${siteUrl}/courses`,
+  },
+  openGraph: {
+    title: "IT & Computer Courses with Placement - MTech IT Institute",
+    description: "Explore top IT & computer courses like Web Development, Digital Marketing, and Tally. Get expert training and career support at MTech IT Institute.",
+    url: `${siteUrl}/courses`,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "IT & Computer Courses with Placement - MTech IT Institute",
+    description: "Explore top IT & computer courses like Web Development, Digital Marketing, and Tally. Get expert training and career support at MTech IT Institute.",
+  },
 };
 
 // This forces the page to be dynamically rendered
@@ -36,19 +56,21 @@ export default async function CoursesPage() {
     <div className="bg-background">
       <div className="container py-16 sm:py-24">
         <div className="text-center mb-12">
-          <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Our Courses</h1>
+          <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Our Professional IT Courses</h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-foreground/80">
-            Find the perfect course to advance your skills and career.
+            Find the perfect job-oriented course to advance your skills and launch your career in the tech industry.
           </p>
         </div>
 
         <div className="space-y-12">
           {courses.map((course, index) => (
+            <>
+            <JsonLd data={courseSchema(course)} />
             <Card key={course.id} className="overflow-hidden shadow-lg grid grid-cols-1 md:grid-cols-2">
               <div className="relative min-h-[250px] md:min-h-full">
                 <Image
                   src={course.image}
-                  alt={course.title}
+                  alt={`${course.title} course banner`}
                   data-ai-hint={course.title.split(' ').slice(0,2).join(' ').toLowerCase()}
                   fill
                   className="object-cover"
@@ -56,7 +78,7 @@ export default async function CoursesPage() {
               </div>
               <div className="p-6 md:p-8 flex flex-col">
                 <CardHeader className="p-0">
-                  <CardTitle className="font-headline text-2xl mb-2 text-primary">{course.title}</CardTitle>
+                  <CardTitle className="font-headline text-2xl mb-2 text-primary">{course.title} Course</CardTitle>
                   <CardDescription>{course.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0 mt-4 flex-grow">
@@ -95,6 +117,7 @@ export default async function CoursesPage() {
                 </CardFooter>
               </div>
             </Card>
+            </>
           ))}
         </div>
       </div>
