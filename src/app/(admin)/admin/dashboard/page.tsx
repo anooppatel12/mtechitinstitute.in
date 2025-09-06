@@ -4,7 +4,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,19 +61,20 @@ import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import type { Course, BlogPost, Resource, Enrollment, ContactSubmission } from "@/lib/types";
 import { db, auth } from "@/lib/firebase";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp, where } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from "next/navigation";
 
 
-type ItemType = 'courses' | 'blog' | 'resources' | 'settings' | 'enrollments' | 'contacts';
+type ItemType = 'courses' | 'blog' | 'guidance' | 'resources' | 'settings' | 'enrollments' | 'contacts';
 
 export default function AdminDashboardPage() {
     const [user, authLoading, authError] = useAuthState(auth);
     const router = useRouter();
     const [courses, setCourses] = useState<Course[]>([]);
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+    const [guidanceArticles, setGuidanceArticles] = useState<BlogPost[]>([]);
     const [resources, setResources] = useState<Resource[]>([]);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [contacts, setContacts] = useState<ContactSubmission[]>([]);
@@ -99,8 +100,10 @@ export default function AdminDashboardPage() {
 
             const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
             const blogSnapshot = await getDocs(blogQuery);
-            const blogList = blogSnapshot.docs.map(doc => ({ ...doc.data(), slug: doc.id } as BlogPost));
-            setBlogPosts(blogList);
+            const allPosts = blogSnapshot.docs.map(doc => ({ ...doc.data(), slug: doc.id } as BlogPost));
+            setBlogPosts(allPosts.filter(post => post.category !== "Career Guidance"));
+            setGuidanceArticles(allPosts.filter(post => post.category === "Career Guidance"));
+
 
             const resourcesCollection = collection(db, "resources");
             const resourceSnapshot = await getDocs(resourcesCollection);
@@ -160,7 +163,7 @@ export default function AdminDashboardPage() {
         
         try {
             if (type === 'courses') await deleteDoc(doc(db, "courses", id));
-            if (type === 'blog') await deleteDoc(doc(db, "blog", id));
+            if (type === 'blog' || type === 'guidance') await deleteDoc(doc(db, "blog", id));
             if (type === 'resources') await deleteDoc(doc(db, "resources", id));
             if (type === 'enrollments') await deleteDoc(doc(db, "enrollments", id));
             if (type === 'contacts') await deleteDoc(doc(db, "contacts", id));
@@ -177,7 +180,11 @@ export default function AdminDashboardPage() {
     
     const handleAddNew = () => {
         setEditingItem(null);
-        setFormData({});
+        let initialData = {};
+        if (activeTab === 'guidance') {
+            initialData = { category: "Career Guidance" };
+        }
+        setFormData(initialData);
         setIsFormOpen(true);
     };
 
@@ -231,7 +238,7 @@ export default function AdminDashboardPage() {
                 } else {
                     await addDoc(collection(db, "courses"), courseData);
                 }
-            } else if (activeTab === 'blog') {
+            } else if (activeTab === 'blog' || activeTab === 'guidance') {
                 const blogData = { ...formData, image: formData.image || `https://picsum.photos/seed/${formData.title || 'blog'}/800/450` };
                 if (editingItem) {
                     const slug = (editingItem as BlogPost).slug;
@@ -242,7 +249,7 @@ export default function AdminDashboardPage() {
                     const newSlug = createSlug(formData.title);
                     if (!newSlug) {
                         console.error("Cannot create blog post without a title.");
-                        toast({ title: "Error", description: "Blog post must have a title.", variant: "destructive" });
+                        toast({ title: "Error", description: "Post must have a title.", variant: "destructive" });
                         return;
                     }
                     const newPostData = { ...blogData };
@@ -344,8 +351,17 @@ export default function AdminDashboardPage() {
         }
     };
 
+    const getFormTitle = () => {
+        if (activeTab === 'courses') return editingItem ? 'Edit Course' : 'Add New Course';
+        if (activeTab === 'blog') return editingItem ? 'Edit Blog Post' : 'Add New Blog Post';
+        if (activeTab === 'guidance') return editingItem ? 'Edit Guidance Article' : 'Add New Guidance Article';
+        if (activeTab === 'resources') return editingItem ? 'Edit Resource' : 'Add New Resource';
+        return 'Edit Item';
+    }
+
 
     const renderFormFields = () => {
+        const isGuidance = activeTab === 'guidance';
         switch(activeTab) {
             case 'courses': return (
                 <>
@@ -375,7 +391,9 @@ export default function AdminDashboardPage() {
                     </div>
                 </>
             );
-            case 'blog': return (
+            case 'blog':
+            case 'guidance':
+                return (
                 <>
                     <div className="grid gap-2">
                         <Label htmlFor="title">Title</Label>
@@ -391,7 +409,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="category">Category</Label>
-                        <Input id="category" name="category" value={formData.category || ''} onChange={handleFormChange} />
+                        <Input id="category" name="category" value={formData.category || ''} onChange={handleFormChange} disabled={isGuidance} />
                     </div>
                      <div className="grid gap-2">
                         <Label htmlFor="image">Image URL</Label>
@@ -450,6 +468,7 @@ export default function AdminDashboardPage() {
                             <TabsList>
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
                                 <TabsTrigger value="blog">Blog Posts</TabsTrigger>
+                                <TabsTrigger value="guidance"><Briefcase className="mr-2 h-4 w-4"/>Career Guidance</TabsTrigger>
                                 <TabsTrigger value="resources">Resources</TabsTrigger>
                                 <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
                                 <TabsTrigger value="contacts"><MessageSquare className="mr-2 h-4 w-4"/>Contacts</TabsTrigger>
@@ -559,6 +578,59 @@ export default function AdminDashboardPage() {
                                                                  <DropdownMenuSeparator />
                                                                 <DropdownMenuItem onClick={() => handleEdit(post)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                                                                 <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('blog', post.slug)}>
+                                                                    <Trash className="mr-2 h-4 w-4" />Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                    }
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="guidance">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Career Guidance Articles</CardTitle>
+                                    <CardDescription>
+                                        Manage your career guidance content.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                     {loading ? <p>Loading articles...</p> :
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Title</TableHead>
+                                                <TableHead>Author</TableHead>
+                                                <TableHead>Date</TableHead>
+                                                <TableHead>
+                                                    <span className="sr-only">Actions</span>
+                                                </TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {guidanceArticles.map(post => (
+                                                <TableRow key={post.slug}>
+                                                    <TableCell className="font-medium">{post.title}</TableCell>
+                                                    <TableCell>{post.author}</TableCell>
+                                                    <TableCell>{post.date}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Toggle menu</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                 <DropdownMenuSeparator />
+                                                                <DropdownMenuItem onClick={() => handleEdit(post)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('guidance', post.slug)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
@@ -785,9 +857,9 @@ export default function AdminDashboardPage() {
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
                 <DialogContent className="sm:max-w-[425px] md:max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editingItem ? `Edit ${activeTab.slice(0, -1)}` : `Add New ${activeTab.slice(0, -1)}`}</DialogTitle>
+                        <DialogTitle>{getFormTitle()}</DialogTitle>
                         <DialogDescription>
-                           {editingItem ? `Make changes to your ${activeTab.slice(0, -1)} here.` : `Add a new ${activeTab.slice(0, -1)} to your site.`} Click save when you're done.
+                           {editingItem ? `Make changes to your item here.` : `Add a new item to your site.`} Click save when you're done.
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleFormSubmit}>
@@ -803,4 +875,5 @@ export default function AdminDashboardPage() {
             </Dialog>
         </>
     );
-}
+
+    
