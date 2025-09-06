@@ -369,6 +369,10 @@ export default function AdminDashboardPage() {
                         <Label htmlFor="syllabus">Syllabus (comma-separated)</Label>
                         <Textarea id="syllabus" name="syllabus" value={Array.isArray(formData.syllabus) ? formData.syllabus.join(', ') : ''} onChange={handleFormChange} />
                     </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="image">Image URL</Label>
+                        <Input id="image" name="image" value={formData.image || ''} onChange={handleFormChange} placeholder="https://example.com/image.jpg"/>
+                    </div>
                 </>
             );
             case 'blog': return (
@@ -388,6 +392,10 @@ export default function AdminDashboardPage() {
                     <div className="grid gap-2">
                         <Label htmlFor="category">Category</Label>
                         <Input id="category" name="category" value={formData.category || ''} onChange={handleFormChange} />
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="image">Image URL</Label>
+                        <Input id="image" name="image" value={formData.image || ''} onChange={handleFormChange} placeholder="https://example.com/image.jpg"/>
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="content">Content (HTML)</Label>
