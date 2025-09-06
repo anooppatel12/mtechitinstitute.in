@@ -34,11 +34,15 @@ export async function submitContactForm(
   }
 
   try {
-    console.log("Form submission received:");
-    console.log(parsed.data);
-    // Here you would typically send an email or save to a database
+    const contactData = {
+        ...parsed.data,
+        submittedAt: serverTimestamp(),
+    };
+    await addDoc(collection(db, "contacts"), contactData);
+
     return { message: "Thank you for your message! We will get back to you soon." };
   } catch (error) {
+    console.error("Error submitting contact form:", error);
     return { message: "An error occurred. Please try again later." };
   }
 }

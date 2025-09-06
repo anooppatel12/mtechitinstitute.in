@@ -4,7 +4,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -59,7 +59,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
-import type { Course, BlogPost, Resource, Enrollment } from "@/lib/types";
+import type { Course, BlogPost, Resource, Enrollment, ContactSubmission } from "@/lib/types";
 import { db, auth } from "@/lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -67,7 +67,7 @@ import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, Ema
 import { useRouter } from "next/navigation";
 
 
-type ItemType = 'courses' | 'blog' | 'resources' | 'settings' | 'enrollments';
+type ItemType = 'courses' | 'blog' | 'resources' | 'settings' | 'enrollments' | 'contacts';
 
 export default function AdminDashboardPage() {
     const [user, authLoading, authError] = useAuthState(auth);
@@ -76,6 +76,7 @@ export default function AdminDashboardPage() {
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [resources, setResources] = useState<Resource[]>([]);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+    const [contacts, setContacts] = useState<ContactSubmission[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
@@ -114,6 +115,15 @@ export default function AdminDashboardPage() {
               return { id: doc.id, ...data, submittedAt } as Enrollment;
             });
             setEnrollments(enrollmentList);
+            
+            const contactsQuery = query(collection(db, "contacts"), orderBy("submittedAt", "desc"));
+            const contactSnapshot = await getDocs(contactsQuery);
+            const contactList = contactSnapshot.docs.map(doc => {
+              const data = doc.data();
+              const submittedAt = (data.submittedAt as Timestamp)?.toDate().toLocaleString() || new Date().toLocaleString();
+              return { id: doc.id, ...data, submittedAt } as ContactSubmission;
+            });
+            setContacts(contactList);
 
 
         } catch (error) {
@@ -153,6 +163,7 @@ export default function AdminDashboardPage() {
             if (type === 'blog') await deleteDoc(doc(db, "blog", id));
             if (type === 'resources') await deleteDoc(doc(db, "resources", id));
             if (type === 'enrollments') await deleteDoc(doc(db, "enrollments", id));
+            if (type === 'contacts') await deleteDoc(doc(db, "contacts", id));
             await fetchData(); // Refetch all data
             toast({ title: "Success", description: "Item deleted successfully." });
         } catch (error) {
@@ -433,10 +444,11 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="blog">Blog Posts</TabsTrigger>
                                 <TabsTrigger value="resources">Resources</TabsTrigger>
                                 <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
+                                <TabsTrigger value="contacts"><MessageSquare className="mr-2 h-4 w-4"/>Contacts</TabsTrigger>
                                 <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
                             </TabsList>
                              <div className="ml-auto flex items-center gap-2">
-                                {activeTab !== 'settings' && activeTab !== 'enrollments' && (
+                                {activeTab !== 'settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && (
                                 <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -646,6 +658,60 @@ export default function AdminDashboardPage() {
                                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                                  <DropdownMenuSeparator />
                                                                 <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('enrollments', enrollment.id)}>
+                                                                    <Trash className="mr-2 h-4 w-4" />Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                     }
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                         <TabsContent value="contacts">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Contact Submissions</CardTitle>
+                                    <CardDescription>
+                                        View and manage messages from the contact form.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                     {loading ? <p>Loading messages...</p> :
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead>Email</TableHead>
+                                                <TableHead>Message</TableHead>
+                                                <TableHead>Submitted At</TableHead>
+                                                <TableHead>
+                                                    <span className="sr-only">Actions</span>
+                                                </TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {contacts.map(contact => (
+                                                <TableRow key={contact.id}>
+                                                    <TableCell className="font-medium">{contact.name}</TableCell>
+                                                    <TableCell>{contact.email}</TableCell>
+                                                    <TableCell className="max-w-xs truncate">{contact.message}</TableCell>
+                                                    <TableCell>{contact.submittedAt}</TableCell>
+                                                    <TableCell className="text-right">
+                                                         <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Toggle menu</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                 <DropdownMenuSeparator />
+                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('contacts', contact.id)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>

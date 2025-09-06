@@ -1,3 +1,4 @@
+
 export type Course = {
   id: string;
   title: string;
@@ -41,3 +42,11 @@ export type Enrollment = {
   message: string;
   submittedAt: string;
 };
+
+export type ContactSubmission = {
+    id: string;
+    name: string;
+    email: string;
+    message: string;
+    submittedAt: string;
+}
