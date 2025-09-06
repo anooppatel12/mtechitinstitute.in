@@ -21,22 +21,22 @@ import type { Metadata } from "next";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
 
 export const metadata: Metadata = {
-  title: "IT & Computer Courses with Placement - MTech IT Institute",
-  description: "Explore top IT & computer courses like Web Development, Digital Marketing, and Tally. Get expert training and career support at MTech IT Institute.",
-  keywords: ["computer courses", "IT courses", "web development course", "digital marketing course", "Tally course", "job oriented courses"],
+  title: "IT & Computer Courses in Patti, Pratapgarh - MTech IT Institute",
+  description: "Explore top IT & computer courses like Web Development, Digital Marketing, Tally, CCC, O-Level in Patti. Get expert training at MTech IT Institute.",
+  keywords: ["computer courses patti", "IT courses pratapgarh", "web development course", "digital marketing course", "Tally course", "CCC course", "O-Level course", "job oriented courses after 12th"],
   alternates: {
     canonical: `${siteUrl}/courses`,
   },
   openGraph: {
-    title: "IT & Computer Courses with Placement - MTech IT Institute",
-    description: "Explore top IT & computer courses like Web Development, Digital Marketing, and Tally. Get expert training and career support at MTech IT Institute.",
+    title: "IT & Computer Courses in Patti, Pratapgarh - MTech IT Institute",
+    description: "Explore top IT & computer courses like Web Development, Digital Marketing, Tally, CCC, O-Level in Patti. Get expert training at MTech IT Institute.",
     url: `${siteUrl}/courses`,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "IT & Computer Courses with Placement - MTech IT Institute",
-    description: "Explore top IT & computer courses like Web Development, Digital Marketing, and Tally. Get expert training and career support at MTech IT Institute.",
+    title: "IT & Computer Courses in Patti, Pratapgarh - MTech IT Institute",
+    description: "Explore top IT & computer courses like Web Development, Digital Marketing, Tally, CCC, O-Level in Patti. Get expert training at MTech IT Institute.",
   },
 };
 
@@ -59,7 +59,7 @@ export default async function CoursesPage() {
         <div className="text-center mb-12">
           <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Our Professional IT Courses</h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-foreground/80">
-            Find the perfect job-oriented course to advance your skills and launch your career in the tech industry.
+            Find the perfect job-oriented computer course in Patti to advance your skills and launch your career in the tech industry.
           </p>
         </div>
 

@@ -8,21 +8,21 @@ import type { Metadata } from "next";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
 
 export const metadata: Metadata = {
-  title: "Contact MTech IT Institute - Best Computer Training Center",
-  description: "Contact MTech IT Institute for admissions, course details, or any inquiry. We're the leading computer training center in Patti, Pratapgarh.",
-  keywords: ["computer training institute contact", "MTech IT Institute address", "MTech IT Institute phone number", "join MTech IT Institute"],
+  title: "Contact MTech IT Institute - Computer Center in Patti",
+  description: "Contact MTech IT Institute for admissions, course details, or any inquiry. We're the leading computer training center in Patti, Pratapgarh. Call 7800413348.",
+  keywords: ["computer training institute contact patti", "MTech IT Institute address", "MTech IT Institute phone number", "join MTech IT Institute patti", "computer center in patti pratapgarh"],
    alternates: {
     canonical: `${siteUrl}/contact`,
   },
   openGraph: {
-    title: "Contact MTech IT Institute - Best Computer Training Center",
+    title: "Contact MTech IT Institute - Computer Center in Patti",
     description: "Contact MTech IT Institute for admissions, course details, or any inquiry. We're the leading computer training center in Patti, Pratapgarh.",
     url: `${siteUrl}/contact`,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Contact MTech IT Institute - Best Computer Training Center",
+    title: "Contact MTech IT Institute - Computer Center in Patti",
     description: "Contact MTech IT Institute for admissions, course details, or any inquiry. We're the leading computer training center in Patti, Pratapgarh.",
   },
 };
@@ -34,7 +34,7 @@ export default function ContactPage() {
         <div className="text-center mb-12">
           <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Contact Us</h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-primary/80">
-            Have questions about our computer courses or career guidance? We'd love to hear from you.
+            Have questions about our computer courses in Patti? We'd love to hear from you.
           </p>
         </div>
 

@@ -9,13 +9,13 @@ export default function About() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="font-headline text-3xl font-bold text-primary sm:text-4xl">
-              Unlock Your Potential with India's Best IT Training Institute
+              Unlock Your Potential with Patti's Best IT Training Institute
             </h2>
             <p className="mt-4 text-lg text-foreground/80">
-              At MTech IT Institute, we are committed to providing high-quality, industry-relevant training in a wide range of computer and IT courses. Our mission is to equip students with the skills and knowledge they need to thrive in the ever-evolving tech landscape.
+              At MTech IT Institute in Patti, Pratapgarh, we are committed to providing high-quality, industry-relevant training in a wide range of computer and IT courses. Our mission is to equip students with the skills and knowledge they need to thrive in the ever-evolving tech landscape.
             </p>
             <p className="mt-4 text-foreground/80">
-              Whether you are a beginner looking to start your journey in IT, or a professional aiming to upgrade your skills, our <Link href="/courses" className="text-accent hover:underline">comprehensive curriculum</Link> and experienced instructors are here to guide you every step of the way. We focus on practical, hands-on learning to ensure you are job-ready from day one.
+              Whether you are a beginner looking to start your journey in IT, or a professional aiming to upgrade your skills, our <Link href="/courses" className="text-accent hover:underline">comprehensive computer courses</Link> and experienced instructors are here to guide you every step of the way. We focus on practical, hands-on learning to ensure you are job-ready from day one.
             </p>
           </div>
           <div className="w-full">
@@ -23,7 +23,7 @@ export default function About() {
               <CardContent className="p-0">
                 <Image
                   src="https://res.cloudinary.com/dzr4xjizf/image/upload/v1757136324/ChatGPT_Image_Sep_5_2025_10_25_03_PM_w0e2ry.png"
-                  alt="MTech IT Institute Certificate of Completion"
+                  alt="MTech IT Institute Certificate of Completion for computer courses"
                   data-ai-hint="certificate award"
                   width={800}
                   height={600}
