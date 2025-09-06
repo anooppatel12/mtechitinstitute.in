@@ -12,6 +12,7 @@ import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import type { Course } from "@/lib/types";
+import { EnrollModal } from "@/components/enroll-modal";
 
 export const metadata = {
   title: "Our Courses",
@@ -88,7 +89,9 @@ export default async function CoursesPage() {
                   </Accordion>
                 </CardContent>
                 <CardFooter className="p-0 mt-6">
-                  <Button className="w-full" size="lg">Enroll Now</Button>
+                    <EnrollModal>
+                      <Button className="w-full" size="lg">Enroll Now</Button>
+                    </EnrollModal>
                 </CardFooter>
               </div>
             </Card>

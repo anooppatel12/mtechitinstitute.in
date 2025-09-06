@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, IndianRupee } from "lucide-react";
+import { EnrollModal } from "./enroll-modal";
 
 type CourseCardProps = {
   course: Course;
@@ -44,7 +45,9 @@ export default function CourseCard({ course }: CourseCardProps) {
                 <span>{course.fees}</span>
             </div>
         </div>
-        <Button className="w-full">Enroll Now</Button>
+        <EnrollModal>
+          <Button className="w-full">Enroll Now</Button>
+        </EnrollModal>
       </CardFooter>
     </Card>
   );

@@ -53,13 +53,13 @@ export default function Footer() {
           <div>
             <h3 className="font-headline text-lg font-semibold mb-4">Follow Us</h3>
             <div className="flex space-x-4">
-              <Link href="#" aria-label="WhatsApp" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
+              <Link href="#contact" aria-label="WhatsApp" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
                 <Send className="w-5 h-5" />
               </Link>
-              <Link href="#" aria-label="Facebook" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
+              <Link href="https://www.facebook.com/people/Mtech-it-institute/61562000094984/?mibextid=ZbWKwL" aria-label="Facebook" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
                 <Facebook className="w-5 h-5" />
               </Link>
-              <Link href="#" aria-label="Instagram" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
+              <Link href="https://www.instagram.com/mtechitinstitute" aria-label="Instagram" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
                 <Instagram className="w-5 h-5" />
               </Link>
             </div>

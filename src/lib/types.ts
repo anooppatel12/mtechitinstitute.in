@@ -32,3 +32,12 @@ export type NavItem = {
   title: string;
   href: string;
 };
+
+export type Enrollment = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  submittedAt: string;
+};

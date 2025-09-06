@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { navItems } from "@/lib/data";
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { EnrollModal } from "@/components/enroll-modal";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -37,9 +38,9 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-           <Button asChild className="hidden md:inline-flex">
-              <Link href="/courses">Enroll Now</Link>
-           </Button>
+           <EnrollModal>
+              <Button className="hidden md:inline-flex">Enroll Now</Button>
+           </EnrollModal>
           <Button
             variant="ghost"
             size="icon"
@@ -72,9 +73,9 @@ export default function Header() {
                     </Link>
                 ))}
                 </nav>
-                <Button asChild>
-                  <Link href="/courses" onClick={() => setIsOpen(false)}>Enroll Now</Link>
-                </Button>
+                <EnrollModal>
+                  <Button className="w-full" onClick={() => setIsOpen(false)}>Enroll Now</Button>
+                </EnrollModal>
             </div>
           </div>
         </div>

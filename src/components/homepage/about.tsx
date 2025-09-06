@@ -21,7 +21,7 @@ export default function About() {
             <Card className="overflow-hidden shadow-lg">
               <CardContent className="p-0">
                 <Image
-                  src="https://images.jdmagicbox.com/comp/bhopal/y8/0755p755stdy8/catalogue/mtech-it-institute-indrapuri-bhopal-computer-training-institutes-fqw2b0n.jpg"
+                  src="https://res.cloudinary.com/dzr4xjizf/image/upload/v1757136324/ChatGPT_Image_Sep_5_2025_10_25_03_PM_w0e2ry.png"
                   alt="MTech IT Institute Certificate"
                   data-ai-hint="certificate award"
                   width={800}

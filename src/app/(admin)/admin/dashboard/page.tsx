@@ -4,7 +4,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -59,15 +59,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
-import type { Course, BlogPost, Resource } from "@/lib/types";
+import type { Course, BlogPost, Resource, Enrollment } from "@/lib/types";
 import { db, auth } from "@/lib/firebase";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from "next/navigation";
 
 
-type ItemType = 'courses' | 'blog' | 'resources' | 'settings';
+type ItemType = 'courses' | 'blog' | 'resources' | 'settings' | 'enrollments';
 
 export default function AdminDashboardPage() {
     const [user, authLoading, authError] = useAuthState(auth);
@@ -75,6 +75,7 @@ export default function AdminDashboardPage() {
     const [courses, setCourses] = useState<Course[]>([]);
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [resources, setResources] = useState<Resource[]>([]);
+    const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
@@ -104,6 +105,16 @@ export default function AdminDashboardPage() {
             const resourceSnapshot = await getDocs(resourcesCollection);
             const resourceList = resourceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Resource));
             setResources(resourceList);
+
+            const enrollmentsQuery = query(collection(db, "enrollments"), orderBy("submittedAt", "desc"));
+            const enrollmentSnapshot = await getDocs(enrollmentsQuery);
+            const enrollmentList = enrollmentSnapshot.docs.map(doc => {
+              const data = doc.data();
+              const submittedAt = (data.submittedAt as Timestamp)?.toDate().toLocaleString() || new Date().toLocaleString();
+              return { id: doc.id, ...data, submittedAt } as Enrollment;
+            });
+            setEnrollments(enrollmentList);
+
 
         } catch (error) {
             console.error("Error fetching data: ", error);
@@ -141,6 +152,7 @@ export default function AdminDashboardPage() {
             if (type === 'courses') await deleteDoc(doc(db, "courses", id));
             if (type === 'blog') await deleteDoc(doc(db, "blog", id));
             if (type === 'resources') await deleteDoc(doc(db, "resources", id));
+            if (type === 'enrollments') await deleteDoc(doc(db, "enrollments", id));
             await fetchData(); // Refetch all data
             toast({ title: "Success", description: "Item deleted successfully." });
         } catch (error) {
@@ -420,10 +432,11 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
                                 <TabsTrigger value="blog">Blog Posts</TabsTrigger>
                                 <TabsTrigger value="resources">Resources</TabsTrigger>
+                                <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
                                 <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
                             </TabsList>
                              <div className="ml-auto flex items-center gap-2">
-                                {activeTab !== 'settings' && (
+                                {activeTab !== 'settings' && activeTab !== 'enrollments' && (
                                 <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -579,6 +592,60 @@ export default function AdminDashboardPage() {
                                                                  <DropdownMenuSeparator />
                                                                 <DropdownMenuItem onClick={() => handleEdit(resource)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                                                                 <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('resources', resource.id)}>
+                                                                    <Trash className="mr-2 h-4 w-4" />Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                     }
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                         <TabsContent value="enrollments">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Enrollment Submissions</CardTitle>
+                                    <CardDescription>
+                                        View and manage course enrollment applications.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                     {loading ? <p>Loading enrollments...</p> :
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Name</TableHead>
+                                                <TableHead>Email</TableHead>
+                                                <TableHead>Phone</TableHead>
+                                                <TableHead>Submitted At</TableHead>
+                                                <TableHead>
+                                                    <span className="sr-only">Actions</span>
+                                                </TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {enrollments.map(enrollment => (
+                                                <TableRow key={enrollment.id}>
+                                                    <TableCell className="font-medium">{enrollment.name}</TableCell>
+                                                    <TableCell>{enrollment.email}</TableCell>
+                                                     <TableCell>{enrollment.phone}</TableCell>
+                                                    <TableCell>{enrollment.submittedAt}</TableCell>
+                                                    <TableCell className="text-right">
+                                                         <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                    <MoreHorizontal className="h-4 w-4" />
+                                                                    <span className="sr-only">Toggle menu</span>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                 <DropdownMenuSeparator />
+                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('enrollments', enrollment.id)}>
                                                                     <Trash className="mr-2 h-4 w-4" />Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
