@@ -55,9 +55,8 @@ export const metadata: Metadata = {
     "Pratapgarh",
   ],
   icons: {
-    icon: [{ url: faviconUrl, type: 'image/png' }],
-    shortcut: [{ url: faviconUrl, type: 'image/png' }],
-    apple: [{ url: faviconUrl, type: 'image/png' }],
+    icon: faviconUrl,
+    apple: faviconUrl,
   },
   openGraph: {
     type: "website",
@@ -97,6 +96,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+         <link rel="icon" href={faviconUrl} type="image/png" sizes="any" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-body antialiased",
