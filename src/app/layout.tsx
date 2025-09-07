@@ -24,6 +24,8 @@ const spaceGrotesk = Space_Grotesk({
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
 
+const faviconUrl = "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -53,9 +55,9 @@ export const metadata: Metadata = {
     "Pratapgarh",
   ],
   icons: {
-    icon: { url: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png", type: "image/png" },
-    shortcut: { url: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png", type: "image/png" },
-    apple: { url: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png", type: "image/png", sizes: "180x180" },
+    icon: [{ url: faviconUrl, type: 'image/png' }],
+    shortcut: [{ url: faviconUrl, type: 'image/png' }],
+    apple: [{ url: faviconUrl, type: 'image/png' }],
   },
   openGraph: {
     type: "website",
@@ -95,6 +97,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+       <head>
+        <link rel="icon" href={faviconUrl} type="image/png" sizes="any" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-body antialiased",
@@ -113,4 +118,3 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
