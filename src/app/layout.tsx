@@ -21,25 +21,49 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "MTech IT Institute - Best Computer Institute in Patti, Pratapgarh",
+    default:
+      "MTech IT Institute - Best Computer Institute in Patti, Pratapgarh",
     template: "%s | MTech IT Institute",
   },
-  description: "Join MTech IT Institute, the best computer training center in Patti, Pratapgarh. We offer expert-led IT courses in Web Development, Digital Marketing, Tally, O-Level, CCC, PGDCA, and more to kickstart your tech career.",
-  keywords: ["best computer institute in patti", "computer center in patti pratapgarh", "IT training institute patti", "computer courses patti", "after 12th career courses", "MTech IT Institute", "learn coding", "digital marketing courses", "web development course", "Tally course", "CCC course", "O-Level course", "PGDCA", "BCA", "Excel course", "Patti", "Pratapgarh"],
+  description:
+    "Join MTech IT Institute, the best computer training center in Patti, Pratapgarh. We offer expert-led IT courses in Web Development, Digital Marketing, Tally, O-Level, CCC, PGDCA, and more to kickstart your tech career.",
+  keywords: [
+    "best computer institute in patti",
+    "computer center in patti pratapgarh",
+    "IT training institute patti",
+    "computer courses patti",
+    "after 12th career courses",
+    "MTech IT Institute",
+    "learn coding",
+    "digital marketing courses",
+    "web development course",
+    "Tally course",
+    "CCC course",
+    "O-Level course",
+    "PGDCA",
+    "BCA",
+    "Excel course",
+    "Patti",
+    "Pratapgarh",
+  ],
   icons: {
-    icon: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png",
+    icon: { url: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png", type: "image/png" },
+    shortcut: { url: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png", type: "image/png" },
+    apple: { url: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png", type: "image/png", sizes: "180x180" },
   },
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: siteUrl,
     title: "MTech IT Institute - Best Computer Institute in Patti, Pratapgarh",
-    description: "Join MTech IT Institute, the best computer training center in Patti. Offering expert-led IT courses to kickstart your tech career.",
+    description:
+      "Join MTech IT Institute, the best computer training center in Patti. Offering expert-led IT courses to kickstart your tech career.",
     images: [
       {
         url: "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757136324/ChatGPT_Image_Sep_5_2025_10_25_03_PM_w0e2ry.png",
@@ -53,14 +77,16 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MTech IT Institute - Best Computer Institute in Patti, Pratapgarh",
-    description: "Join MTech IT Institute, the best computer training center in Patti. Offering expert-led IT courses to kickstart your tech career.",
-    images: ["https://res.cloudinary.com/dzr4xjizf/image/upload/v1757136324/ChatGPT_Image_Sep_5_2025_10_25_03_PM_w0e2ry.png"],
+    description:
+      "Join MTech IT Institute, the best computer training center in Patti. Offering expert-led IT courses to kickstart your tech career.",
+    images: [
+      "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757136324/ChatGPT_Image_Sep_5_2025_10_25_03_PM_w0e2ry.png",
+    ],
   },
   alternates: {
     canonical: siteUrl,
   },
 };
-
 
 export default function RootLayout({
   children,
@@ -69,10 +95,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-       <head>
-          <link rel="icon" href="https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png" type="image/png" sizes="any" />
-      </head>
-      <body className={cn("min-h-screen bg-background font-body antialiased", ptSans.variable, spaceGrotesk.variable)}>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-body antialiased",
+          ptSans.variable,
+          spaceGrotesk.variable
+        )}
+      >
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
         <div className="relative flex min-h-dvh flex-col bg-background">
