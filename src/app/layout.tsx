@@ -97,9 +97,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-       <head>
-        <link rel="icon" href={faviconUrl} type="image/png" sizes="any" />
-      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-body antialiased",
@@ -118,3 +115,4 @@ export default function RootLayout({
       </body>
     </html>
   );
+}
