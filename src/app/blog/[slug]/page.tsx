@@ -10,7 +10,7 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import type { BlogPost, InternalLink } from "@/lib/types";
 import type { Metadata } from 'next';
 import { JsonLd } from "@/components/json-ld";
-import { articleSchema, breadcrumbSchema } from "@/lib/schema";
+import { generatePostSchema, breadcrumbSchema } from "@/lib/schema-generator";
 
 type BlogPostPageProps = {
   params: {
@@ -67,6 +67,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
         publishedTime: new Date(post.date).toISOString(),
         authors: [post.author],
         tags: post.tags,
+        section: post.category,
       },
       images: [
         {
@@ -91,7 +92,8 @@ function applyInternalLinks(content: string, links: InternalLink[] = []): string
   let linkedContent = content;
   if (links.length > 0) {
     links.forEach(link => {
-      const regex = new RegExp(`\\b(${link.keyword})\\b`, 'gi');
+      // Use a more specific regex to avoid linking inside HTML tags
+      const regex = new RegExp(`(?<!<[^>]*)\\b(${link.keyword})\\b(?![^<]*>)`, 'gi');
       linkedContent = linkedContent.replace(regex, (match) => 
         `<a href="${link.url}" title="${link.title}" rel="internal" class="text-accent hover:underline">${match}</a>`
       );
@@ -114,10 +116,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   ];
   
   const finalContent = applyInternalLinks(post.content, post.internalLinks);
+  const postSchema = generatePostSchema(post);
 
   return (
     <>
-      <JsonLd data={articleSchema(post)} />
+      <JsonLd data={postSchema} />
       <JsonLd data={breadcrumbSchema(breadcrumbs)} />
       <div className="bg-background">
         <div className="container py-16 sm:py-24">

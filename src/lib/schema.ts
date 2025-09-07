@@ -1,3 +1,4 @@
+
 import type { Course, BlogPost } from './types';
 import { WithContext, Organization, WebSite, Course as CourseSchema, BlogPosting, BreadcrumbList, ListItem } from 'schema-dts';
 
@@ -57,41 +58,4 @@ export const courseSchema = (course: Course): WithContext<CourseSchema> => ({
   },
   image: course.image,
   courseCode: course.title.replace(/\s+/g, '-').toUpperCase(),
-});
-
-export const articleSchema = (post: BlogPost): WithContext<BlogPosting> => ({
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `${siteUrl}/blog/${post.slug}`,
-    },
-    headline: post.title,
-    description: post.content.substring(0, 160).replace(/<[^>]+>/g, ''),
-    image: post.image,
-    author: {
-        '@type': 'Person',
-        name: post.author,
-    },
-    publisher: {
-        '@type': 'Organization',
-        name: 'MTech IT Institute',
-        logo: {
-            '@type': 'ImageObject',
-            url: 'https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png',
-        },
-    },
-    datePublished: new Date(post.date).toISOString(),
-    dateModified: new Date(post.date).toISOString(),
-});
-
-export const breadcrumbSchema = (items: { name: string; href: string }[]): WithContext<BreadcrumbList> => ({
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: items.map((item, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        name: item.name,
-        item: `${siteUrl}${item.href}`,
-    })),
 });

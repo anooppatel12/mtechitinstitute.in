@@ -1,4 +1,6 @@
 
+import type { HowTo, FAQPage } from 'schema-dts';
+
 export type InternalLink = {
   keyword: string;
   url: string;
@@ -26,6 +28,7 @@ export type BlogPost = {
   content: string;
   summary?: string;
   internalLinks?: InternalLink[];
+  schemaType?: 'Article' | 'HowTo' | 'FAQ'; // To potentially override auto-detection
 };
 
 export type Resource = {
@@ -57,3 +60,7 @@ export type ContactSubmission = {
     message: string;
     submittedAt: string;
 }
+
+// Add types for more complex schemas
+export type HowToSchema = HowTo;
+export type FAQPageSchema = FAQPage;
