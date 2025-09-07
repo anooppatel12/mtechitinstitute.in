@@ -1,4 +1,10 @@
 
+export type InternalLink = {
+  keyword: string;
+  url: string;
+  title: string;
+};
+
 export type Course = {
   id: string;
   title: string;
@@ -11,7 +17,7 @@ export type Course = {
 
 export type BlogPost = {
   slug: string;
-  title: string;
+  title:string;
   date: string;
   author: string;
   category: string;
@@ -19,6 +25,7 @@ export type BlogPost = {
   image: string;
   content: string;
   summary?: string;
+  internalLinks?: InternalLink[];
 };
 
 export type Resource = {

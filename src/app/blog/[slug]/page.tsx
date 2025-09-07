@@ -1,11 +1,13 @@
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { Calendar, User, Tag } from "lucide-react";
 import AdPlaceholder from "@/components/ad-placeholder";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/firebase";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import type { BlogPost } from "@/lib/types";
+import type { BlogPost, InternalLink } from "@/lib/types";
 import type { Metadata } from 'next';
 import { JsonLd } from "@/components/json-ld";
 import { articleSchema, breadcrumbSchema } from "@/lib/schema";
@@ -84,6 +86,20 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   };
 }
 
+// Function to apply internal links to content
+function applyInternalLinks(content: string, links: InternalLink[] = []): string {
+  let linkedContent = content;
+  if (links.length > 0) {
+    links.forEach(link => {
+      const regex = new RegExp(`\\b(${link.keyword})\\b`, 'gi');
+      linkedContent = linkedContent.replace(regex, (match) => 
+        `<a href="${link.url}" title="${link.title}" rel="internal" class="text-accent hover:underline">${match}</a>`
+      );
+    });
+  }
+  return linkedContent;
+}
+
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = await getPost(params.slug);
 
@@ -96,6 +112,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     { name: "Blog", href: "/blog" },
     { name: post.title, href: `/blog/${post.slug}` },
   ];
+  
+  const finalContent = applyInternalLinks(post.content, post.internalLinks);
 
   return (
     <>
@@ -117,10 +135,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                       </div>
                   </div>
 
-                  <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                  <div dangerouslySetInnerHTML={{ __html: finalContent }} />
                   
                   <div className="mt-8 flex flex-wrap gap-2">
-                      {(post.tags || []).map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                      {(post.tags || []).map(tag => (
+                          <Link href={`/blog/tag/${tag}`} key={tag}>
+                             <Badge variant="secondary">{tag}</Badge>
+                          </Link>
+                      ))}
                   </div>
               </article>
               <aside className="lg:col-span-1 space-y-8">

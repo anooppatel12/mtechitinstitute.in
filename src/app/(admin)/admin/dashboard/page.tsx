@@ -4,7 +4,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare, Briefcase } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare, Briefcase, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -57,17 +57,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
-import type { Course, BlogPost, Resource, Enrollment, ContactSubmission } from "@/lib/types";
+import type { Course, BlogPost, Resource, Enrollment, ContactSubmission, InternalLink } from "@/lib/types";
 import { db, auth } from "@/lib/firebase";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp, where } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp, where, arrayUnion, arrayRemove } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from "next/navigation";
 
 
-type ItemType = 'courses' | 'blog' | 'guidance' | 'resources' | 'settings' | 'enrollments' | 'contacts';
+type ItemType = 'courses' | 'blog' | 'guidance' | 'resources' | 'settings' | 'enrollments' | 'contacts' | 'internal-links';
 
 export default function AdminDashboardPage() {
     const [user, authLoading, authError] = useAuthState(auth);
@@ -80,6 +81,13 @@ export default function AdminDashboardPage() {
     const [contacts, setContacts] = useState<ContactSubmission[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+
+    // Internal linking state
+    const [allBlogPostsForLinks, setAllBlogPostsForLinks] = useState<BlogPost[]>([]);
+    const [selectedSourcePost, setSelectedSourcePost] = useState<string>("");
+    const [selectedTargetPost, setSelectedTargetPost] = useState<string>("");
+    const [linkKeyword, setLinkKeyword] = useState<string>("");
+    const [isLinkSaving, setIsLinkSaving] = useState(false);
 
     useEffect(() => {
         if (authLoading) return; // Wait until auth state is loaded
@@ -101,6 +109,8 @@ export default function AdminDashboardPage() {
             const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
             const blogSnapshot = await getDocs(blogQuery);
             const allPosts = blogSnapshot.docs.map(doc => ({ ...doc.data(), slug: doc.id } as BlogPost));
+            
+            setAllBlogPostsForLinks(allPosts); // For internal linking dropdowns
             setBlogPosts(allPosts.filter(post => post.category !== "Career Guidance"));
             setGuidanceArticles(allPosts.filter(post => post.category === "Career Guidance"));
 
@@ -139,6 +149,7 @@ export default function AdminDashboardPage() {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<{type: ItemType, id: string} | null>(null);
+    const [linkToDelete, setLinkToDelete] = useState<{postSlug: string, link: InternalLink} | null>(null);
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<Course | BlogPost | Resource | null>(null);
@@ -157,25 +168,45 @@ export default function AdminDashboardPage() {
         setDialogOpen(true);
     };
 
+    const openLinkDeleteDialog = (postSlug: string, link: InternalLink) => {
+        setLinkToDelete({ postSlug, link });
+        setDialogOpen(true);
+    }
+
+
     const handleDelete = async () => {
-        if (!itemToDelete) return;
-        const { type, id } = itemToDelete;
-        
-        try {
-            if (type === 'courses') await deleteDoc(doc(db, "courses", id));
-            if (type === 'blog' || type === 'guidance') await deleteDoc(doc(db, "blog", id));
-            if (type === 'resources') await deleteDoc(doc(db, "resources", id));
-            if (type === 'enrollments') await deleteDoc(doc(db, "enrollments", id));
-            if (type === 'contacts') await deleteDoc(doc(db, "contacts", id));
-            await fetchData(); // Refetch all data
-            toast({ title: "Success", description: "Item deleted successfully." });
-        } catch (error) {
-            console.error("Error deleting document: ", error);
-             toast({ title: "Error", description: "Could not delete item.", variant: "destructive" });
+        if (itemToDelete) {
+            const { type, id } = itemToDelete;
+            try {
+                if (type === 'courses') await deleteDoc(doc(db, "courses", id));
+                if (type === 'blog' || type === 'guidance') await deleteDoc(doc(db, "blog", id));
+                if (type === 'resources') await deleteDoc(doc(db, "resources", id));
+                if (type === 'enrollments') await deleteDoc(doc(db, "enrollments", id));
+                if (type === 'contacts') await deleteDoc(doc(db, "contacts", id));
+                await fetchData(); // Refetch all data
+                toast({ title: "Success", description: "Item deleted successfully." });
+            } catch (error) {
+                console.error("Error deleting document: ", error);
+                 toast({ title: "Error", description: "Could not delete item.", variant: "destructive" });
+            }
+            setItemToDelete(null);
+        } else if (linkToDelete) {
+             const { postSlug, link } = linkToDelete;
+            try {
+                const postRef = doc(db, "blog", postSlug);
+                await updateDoc(postRef, {
+                    internalLinks: arrayRemove(link)
+                });
+                await fetchData(); // Refetch all data
+                toast({ title: "Success", description: "Internal link removed." });
+            } catch (error) {
+                 console.error("Error deleting internal link: ", error);
+                 toast({ title: "Error", description: "Could not remove link.", variant: "destructive" });
+            }
+            setLinkToDelete(null);
         }
 
         setDialogOpen(false);
-        setItemToDelete(null);
     };
     
     const handleAddNew = () => {
@@ -224,6 +255,47 @@ export default function AdminDashboardPage() {
         return url; // Return original URL if it doesn't match
     };
 
+    const handleInternalLinkSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedSourcePost || !selectedTargetPost || !linkKeyword) {
+            toast({ title: "Error", description: "Please fill all fields for internal linking.", variant: "destructive" });
+            return;
+        }
+        if (selectedSourcePost === selectedTargetPost) {
+            toast({ title: "Error", description: "Source and Target post cannot be the same.", variant: "destructive" });
+            return;
+        }
+
+        setIsLinkSaving(true);
+        try {
+            const targetPost = allBlogPostsForLinks.find(p => p.slug === selectedTargetPost);
+            if (!targetPost) throw new Error("Target post not found");
+
+            const newLink: InternalLink = {
+                keyword: linkKeyword,
+                url: `/blog/${targetPost.slug}`,
+                title: targetPost.title,
+            };
+
+            const sourcePostRef = doc(db, "blog", selectedSourcePost);
+            await updateDoc(sourcePostRef, {
+                internalLinks: arrayUnion(newLink)
+            });
+
+            await fetchData();
+            toast({ title: "Success", description: "Internal link added successfully." });
+            setSelectedSourcePost("");
+            setSelectedTargetPost("");
+            setLinkKeyword("");
+
+        } catch (error) {
+            console.error("Error adding internal link: ", error);
+            toast({ title: "Error", description: "Could not add internal link.", variant: "destructive" });
+        } finally {
+            setIsLinkSaving(false);
+        }
+    };
+
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -252,7 +324,7 @@ export default function AdminDashboardPage() {
                         toast({ title: "Error", description: "Post must have a title.", variant: "destructive" });
                         return;
                     }
-                    const newPostData = { ...blogData };
+                    const newPostData = { ...blogData, internalLinks: [] }; // Add empty internalLinks array
                     delete newPostData.slug;
                     await setDoc(doc(db, "blog", newSlug), newPostData);
                 }
@@ -470,12 +542,13 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="blog">Blog Posts</TabsTrigger>
                                 <TabsTrigger value="guidance"><Briefcase className="mr-2 h-4 w-4"/>Career Guidance</TabsTrigger>
                                 <TabsTrigger value="resources">Resources</TabsTrigger>
+                                <TabsTrigger value="internal-links"><Link2 className="mr-2 h-4 w-4"/>Internal Links</TabsTrigger>
                                 <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
                                 <TabsTrigger value="contacts"><MessageSquare className="mr-2 h-4 w-4"/>Contacts</TabsTrigger>
                                 <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
                             </TabsList>
                              <div className="ml-auto flex items-center gap-2">
-                                {activeTab !== 'settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && (
+                                {activeTab !== 'settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && activeTab !== 'internal-links' && (
                                 <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -697,6 +770,76 @@ export default function AdminDashboardPage() {
                                 </CardContent>
                             </Card>
                         </TabsContent>
+                         <TabsContent value="internal-links">
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Manage Internal Links</CardTitle>
+                                    <CardDescription>Create internal links between your blog posts to improve SEO and user navigation.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <form onSubmit={handleInternalLinkSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="sourcePost">Source Post (Where to add the link)</Label>
+                                            <Select value={selectedSourcePost} onValueChange={setSelectedSourcePost}>
+                                                <SelectTrigger id="sourcePost"><SelectValue placeholder="Select a post" /></SelectTrigger>
+                                                <SelectContent>
+                                                    {allBlogPostsForLinks.map(post => <SelectItem key={post.slug} value={post.slug}>{post.title}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="targetPost">Target Post (Which post to link to)</Label>
+                                            <Select value={selectedTargetPost} onValueChange={setSelectedTargetPost}>
+                                                <SelectTrigger id="targetPost"><SelectValue placeholder="Select a post" /></SelectTrigger>
+                                                <SelectContent>
+                                                    {allBlogPostsForLinks.map(post => <SelectItem key={post.slug} value={post.slug}>{post.title}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                         <div className="grid gap-2">
+                                            <Label htmlFor="linkKeyword">Keyword to Link</Label>
+                                            <Input id="linkKeyword" value={linkKeyword} onChange={e => setLinkKeyword(e.target.value)} placeholder="e.g., typing practice" />
+                                        </div>
+                                        <div className="md:col-span-3">
+                                            <Button type="submit" disabled={isLinkSaving}>{isLinkSaving ? 'Saving...' : 'Add Internal Link'}</Button>
+                                        </div>
+                                    </form>
+
+                                    <div className="mt-8">
+                                        <h3 className="text-lg font-semibold mb-4">Existing Internal Links</h3>
+                                        <div className="space-y-4">
+                                            {allBlogPostsForLinks.filter(p => p.internalLinks && p.internalLinks.length > 0).map(post => (
+                                                <div key={post.slug}>
+                                                    <h4 className="font-semibold">{post.title}</h4>
+                                                    <Table>
+                                                        <TableHeader>
+                                                           <TableRow>
+                                                                <TableHead>Keyword</TableHead>
+                                                                <TableHead>Links To</TableHead>
+                                                                <TableHead className="text-right">Action</TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {post.internalLinks?.map(link => (
+                                                                <TableRow key={`${post.slug}-${link.keyword}`}>
+                                                                    <TableCell>"{link.keyword}"</TableCell>
+                                                                    <TableCell>{link.title}</TableCell>
+                                                                    <TableCell className="text-right">
+                                                                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => openLinkDeleteDialog(post.slug, link)}>
+                                                                            <Trash className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                             </Card>
+                         </TabsContent>
                          <TabsContent value="enrollments">
                             <Card>
                                 <CardHeader>
@@ -875,5 +1018,3 @@ export default function AdminDashboardPage() {
             </Dialog>
         </>
     );
-
-    
