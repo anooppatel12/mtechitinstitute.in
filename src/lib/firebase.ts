@@ -31,11 +31,30 @@ export async function getBlogPostsByCategory(category: string): Promise<BlogPost
         where("category", "==", category)
     );
     const blogSnapshot = await getDocs(blogQuery);
-    const posts = blogSnapshot.docs.map(doc => ({ slug: doc.id, ...doc.data() } as BlogPost));
+    let posts = blogSnapshot.docs.map(doc => ({ slug: doc.id, ...doc.data() } as BlogPost));
 
     // Sort by date in descending order (newest first)
     posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
+    return posts;
+}
+
+export async function getPostsByTag(tag: string): Promise<BlogPost[]> {
+    const q = query(collection(db, "blog"), where("tags", "array-contains", tag));
+    const querySnapshot = await getDocs(q);
+    const posts = querySnapshot.docs.map(doc => {
+         const data = doc.data() as Omit<BlogPost, 'slug' | 'summary'>;
+        const snippet = data.content.replace(/<[^>]+>/g, '').substring(0, 150);
+        return { 
+            ...data, 
+            slug: doc.id,
+            summary: `${snippet}...` 
+        } as BlogPost;
+    });
+
+     // Sort by date in descending order (newest first)
+    posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
     return posts;
 }
 
