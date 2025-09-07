@@ -10,7 +10,7 @@ type TagPageProps = {
   };
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
 export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
   const tagName = decodeURIComponent(params.tag);

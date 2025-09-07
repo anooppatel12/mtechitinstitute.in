@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
 export const metadata: Metadata = {
   title: "Contact MTech IT Institute - Computer Center in Patti",

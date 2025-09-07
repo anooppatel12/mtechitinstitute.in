@@ -22,7 +22,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
 const faviconUrl = "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png";
 

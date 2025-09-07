@@ -1,7 +1,7 @@
 import type { Course, BlogPost } from './types';
 import { WithContext, Organization, WebSite, Course as CourseSchema, BlogPosting, BreadcrumbList, ListItem } from 'schema-dts';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mtechitinstitute.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mtechitinstitute.in';
 
 export const organizationSchema: WithContext<Organization> = {
   '@context': 'https://schema.org',

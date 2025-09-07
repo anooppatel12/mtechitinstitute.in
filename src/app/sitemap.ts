@@ -3,7 +3,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import type { Course, BlogPost } from "@/lib/types";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mtechitinstitute.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mtechitinstitute.in';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [

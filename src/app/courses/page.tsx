@@ -18,7 +18,7 @@ import { courseSchema } from "@/lib/schema";
 import { JsonLd } from "@/components/json-ld";
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
 export const metadata: Metadata = {
   title: "IT & Computer Courses in Patti, Pratapgarh - MTech IT Institute",

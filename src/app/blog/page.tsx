@@ -8,7 +8,7 @@ import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
 export const metadata: Metadata = {
   title: "Tech Blog & Career Guidance After 12th - MTech IT Institute",

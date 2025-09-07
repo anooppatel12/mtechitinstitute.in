@@ -16,7 +16,7 @@ type BlogPostPageProps = {
   };
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
 // This allows Next.js to know which slugs are available at build time
 export async function generateStaticParams() {

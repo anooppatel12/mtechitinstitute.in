@@ -5,7 +5,7 @@ import { getBlogPostsByCategory } from "@/lib/firebase";
 import type { BlogPost } from "@/lib/types";
 import type { Metadata } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
 export const metadata: Metadata = {
   title: "Career Guidance After 12th & For IT Professionals",
