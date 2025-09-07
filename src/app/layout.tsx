@@ -56,6 +56,7 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: faviconUrl,
+    shortcut: faviconUrl,
     apple: faviconUrl,
   },
   openGraph: {
@@ -96,9 +97,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-         <link rel="icon" href={faviconUrl} type="image/png" sizes="any" />
-      </head>
+      <head />
       <body
         className={cn(
           "min-h-screen bg-background font-body antialiased",
