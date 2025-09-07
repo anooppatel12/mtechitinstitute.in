@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { PT_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
@@ -68,6 +69,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+       <head>
+          <link rel="icon" href="https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png" type="image/png" sizes="any" />
+      </head>
       <body className={cn("min-h-screen bg-background font-body antialiased", ptSans.variable, spaceGrotesk.variable)}>
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
