@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 // This forces the page to be dynamically rendered, ensuring data is always fresh
 export const revalidate = 0;
 
-async function getPosts(): Promise<{ posts: BlogPost[], allTags: string[] }> {
+async function getPosts(): Promise<{ posts: BlogPost[], popularTags: string[] }> {
     const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
     const blogSnapshot = await getDocs(blogQuery);
     const posts = blogSnapshot.docs.map(doc => {
@@ -46,12 +46,23 @@ async function getPosts(): Promise<{ posts: BlogPost[], allTags: string[] }> {
         } as BlogPost;
     });
 
-    const allTags = [...new Set(posts.flatMap(p => p.tags || []))];
-    return { posts, allTags };
+    const tagCounts: Record<string, number> = {};
+    posts.forEach(post => {
+        (post.tags || []).forEach(tag => {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+    });
+
+    const popularTags = Object.entries(tagCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 10)
+        .map(([tag]) => tag);
+
+    return { posts, popularTags };
 }
 
 export default async function BlogPage() {
-  const { posts, allTags } = await getPosts();
+  const { posts, popularTags } = await getPosts();
 
   return (
     <div className="bg-secondary">
@@ -75,7 +86,7 @@ export default async function BlogPage() {
                 <div className="p-6 bg-background rounded-lg shadow-sm">
                     <h3 className="font-headline text-lg font-semibold text-primary mb-4">Popular Tags</h3>
                     <div className="flex flex-wrap gap-2">
-                        {allTags.map(tag => (
+                        {popularTags.map(tag => (
                             <Link href={`/blog/tag/${tag}`} key={tag}>
                                 <Badge variant="outline">{tag}</Badge>
                             </Link>
