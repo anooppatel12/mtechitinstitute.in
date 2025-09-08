@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import type { Course } from "@/lib/types";
 import {
@@ -17,6 +18,11 @@ type CourseCardProps = {
 };
 
 export default function CourseCard({ course }: CourseCardProps) {
+  // Truncate description to a reasonable length
+  const summary = course.description.length > 100 
+    ? `${course.description.substring(0, 100)}...` 
+    : course.description;
+
   return (
     <Card className="flex flex-col h-full overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
       <CardHeader className="p-0">
@@ -32,7 +38,7 @@ export default function CourseCard({ course }: CourseCardProps) {
       </CardHeader>
       <CardContent className="flex-grow p-6">
         <CardTitle className="font-headline text-xl mb-2">{course.title}</CardTitle>
-        <CardDescription>{course.description}</CardDescription>
+        <CardDescription className="text-sm">{summary}</CardDescription>
       </CardContent>
       <CardFooter className="flex flex-col items-start gap-4 p-6 pt-0">
         <div className="flex justify-between w-full text-sm text-muted-foreground">
