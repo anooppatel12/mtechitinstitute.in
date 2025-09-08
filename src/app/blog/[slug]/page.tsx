@@ -11,6 +11,7 @@ import type { BlogPost, InternalLink } from "@/lib/types";
 import type { Metadata } from 'next';
 import { JsonLd } from "@/components/json-ld";
 import { generatePostSchema, breadcrumbSchema } from "@/lib/schema-generator";
+import ShareButtons from "@/components/share-buttons";
 
 type BlogPostPageProps = {
   params: {
@@ -150,6 +151,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                           </Link>
                       ))}
                   </div>
+
+                  <ShareButtons title={post.title} />
+
               </article>
               <aside className="lg:col-span-1 space-y-8">
                    <AdPlaceholder />
