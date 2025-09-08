@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
 };
 
-// This forces the page to be dynamically rendered
+// This forces the page to be dynamically rendered, ensuring data is always fresh
 export const revalidate = 0;
 
 async function getPosts(): Promise<{ posts: BlogPost[], allTags: string[] }> {
