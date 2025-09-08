@@ -2,6 +2,7 @@ import type { Course, BlogPost, Resource, NavItem } from "@/lib/types";
 
 export const navItems: NavItem[] = [
   { title: "Home", href: "/" },
+  { title: "About", href: "/about" },
   { title: "Courses", href: "/courses" },
   { title: "Blog", href: "/blog" },
   { title: "Career Guidance", href: "/career" },

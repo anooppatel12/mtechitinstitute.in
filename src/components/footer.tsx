@@ -4,6 +4,12 @@ import Logo from "./logo";
 import { navItems } from "@/lib/data";
 
 export default function Footer() {
+  const footerQuickLinks = [
+    ...navItems,
+    { title: "Privacy Policy", href: "/privacy-policy" },
+    { title: "Terms & Conditions", href: "/terms-and-conditions" },
+  ];
+  
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container py-12">
@@ -34,7 +40,7 @@ export default function Footer() {
           <div>
             <h3 className="font-headline text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              {navItems.map((item) => (
+              {footerQuickLinks.map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="hover:text-accent transition-colors">
                     {item.title}

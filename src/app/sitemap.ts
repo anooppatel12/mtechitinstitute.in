@@ -8,18 +8,21 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mtechitinstitute.in
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     '',
+    '/about',
     '/courses',
     '/blog',
     '/career',
     '/resources',
     '/contact',
+    '/privacy-policy',
+    '/terms-and-conditions',
   ];
 
   const staticUrls = staticRoutes.map((route) => ({
     url: `${siteUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: 'monthly' as const,
-    priority: route === '' ? 1.0 : 0.8,
+    priority: route === '' ? 1.0 : (route === '/privacy-policy' || route === '/terms-and-conditions' ? 0.3 : 0.8),
   }));
 
   const coursesSnapshot = await getDocs(collection(db, "courses"));
