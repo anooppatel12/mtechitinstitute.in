@@ -8,6 +8,8 @@ import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/toaster";
 import { JsonLd } from "@/components/json-ld";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
+import { getSiteSettings } from "@/lib/firebase";
+import AnnouncementBar from "@/components/announcement-bar";
 
 const ptSans = PT_Sans({
   subsets: ["latin"],
@@ -90,11 +92,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const announcement = await getSiteSettings();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -108,6 +112,9 @@ export default function RootLayout({
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
         <div className="relative flex min-h-dvh flex-col bg-background">
+          {announcement && announcement.isVisible && (
+            <AnnouncementBar text={announcement.text} link={announcement.link} />
+          )}
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />

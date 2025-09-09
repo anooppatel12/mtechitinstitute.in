@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, IndianRupee, BookOpen } from "lucide-react";
+import { Clock, IndianRupee, BookOpen, Tag } from "lucide-react";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
@@ -89,8 +89,15 @@ export default async function CoursesPage() {
                           <span>Duration: {course.duration}</span>
                       </div>
                       <div className="flex items-center gap-2 font-semibold text-lg text-primary">
-                          <IndianRupee className="h-5 w-5" />
-                          <span>{course.fees}</span>
+                          {course.actualPrice && (
+                             <span className="flex items-center text-base text-muted-foreground line-through">
+                               <IndianRupee className="h-4 w-4" /> {course.actualPrice}
+                            </span>
+                          )}
+                           <span className="flex items-center text-accent">
+                             <Tag className="h-5 w-5 mr-1" />
+                             <IndianRupee className="h-5 w-5" /> {course.discountPrice}
+                           </span>
                       </div>
                     </div>
                     <Accordion type="single" collapsible>

@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, IndianRupee } from "lucide-react";
+import { Clock, IndianRupee, Tag } from "lucide-react";
 import { EnrollModal } from "./enroll-modal";
 
 type CourseCardProps = {
@@ -47,8 +47,15 @@ export default function CourseCard({ course }: CourseCardProps) {
                 <span>{course.duration}</span>
             </div>
             <div className="flex items-center gap-2 font-semibold text-primary">
-                <IndianRupee className="h-4 w-4" />
-                <span>{course.fees}</span>
+                 {course.actualPrice && (
+                    <span className="text-muted-foreground line-through">
+                        ₹{course.actualPrice}
+                    </span>
+                  )}
+                  <span className="text-accent flex items-center">
+                    <Tag className="h-4 w-4 mr-1" />
+                    ₹{course.discountPrice}
+                  </span>
             </div>
         </div>
         <EnrollModal>

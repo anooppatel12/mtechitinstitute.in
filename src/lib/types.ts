@@ -12,7 +12,8 @@ export type Course = {
   title: string;
   description: string;
   duration: string;
-  fees: string;
+  actualPrice?: string;
+  discountPrice: string; // Formerly 'fees'
   syllabus: string[];
   image: string;
 };
@@ -59,6 +60,13 @@ export type ContactSubmission = {
     email: string;
     message: string;
     submittedAt: string;
+}
+
+export type SiteSettings = {
+    id: 'announcement';
+    text: string;
+    link: string;
+    isVisible: boolean;
 }
 
 // Add types for more complex schemas

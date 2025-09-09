@@ -4,7 +4,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare, Briefcase, Link2 } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare, Briefcase, Link2, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -60,15 +60,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
-import type { Course, BlogPost, Resource, Enrollment, ContactSubmission, InternalLink } from "@/lib/types";
+import { Switch } from "@/components/ui/switch";
+import type { Course, BlogPost, Resource, Enrollment, ContactSubmission, InternalLink, SiteSettings } from "@/lib/types";
 import { db, auth } from "@/lib/firebase";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp, where, arrayUnion, arrayRemove } from "firebase/firestore";
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp, where, arrayUnion, arrayRemove, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from "next/navigation";
 
 
-type ItemType = 'courses' | 'blog' | 'guidance' | 'resources' | 'settings' | 'enrollments' | 'contacts' | 'internal-links';
+type ItemType = 'courses' | 'blog' | 'guidance' | 'resources' | 'settings' | 'enrollments' | 'contacts' | 'internal-links' | 'site-settings';
 
 export default function AdminDashboardPage() {
     const [user, authLoading, authError] = useAuthState(auth);
@@ -81,6 +82,9 @@ export default function AdminDashboardPage() {
     const [contacts, setContacts] = useState<ContactSubmission[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+
+    // Site settings state
+    const [siteSettings, setSiteSettings] = useState<SiteSettings>({ id: 'announcement', text: '', link: '', isVisible: false });
 
     // Internal linking state
     const [allBlogPostsForLinks, setAllBlogPostsForLinks] = useState<BlogPost[]>([]);
@@ -101,11 +105,13 @@ export default function AdminDashboardPage() {
     const fetchData = async () => {
         setLoading(true);
         try {
+            // Courses
             const coursesCollection = collection(db, "courses");
             const courseSnapshot = await getDocs(coursesCollection);
             const courseList = courseSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
             setCourses(courseList);
 
+            // Blog Posts
             const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
             const blogSnapshot = await getDocs(blogQuery);
             const allPosts = blogSnapshot.docs.map(doc => ({ ...doc.data(), slug: doc.id } as BlogPost));
@@ -114,12 +120,13 @@ export default function AdminDashboardPage() {
             setBlogPosts(allPosts.filter(post => post.category !== "Career Guidance"));
             setGuidanceArticles(allPosts.filter(post => post.category === "Career Guidance"));
 
-
+            // Resources
             const resourcesCollection = collection(db, "resources");
             const resourceSnapshot = await getDocs(resourcesCollection);
             const resourceList = resourceSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Resource));
             setResources(resourceList);
 
+            // Enrollments
             const enrollmentsQuery = query(collection(db, "enrollments"), orderBy("submittedAt", "desc"));
             const enrollmentSnapshot = await getDocs(enrollmentsQuery);
             const enrollmentList = enrollmentSnapshot.docs.map(doc => {
@@ -129,6 +136,7 @@ export default function AdminDashboardPage() {
             });
             setEnrollments(enrollmentList);
             
+            // Contacts
             const contactsQuery = query(collection(db, "contacts"), orderBy("submittedAt", "desc"));
             const contactSnapshot = await getDocs(contactsQuery);
             const contactList = contactSnapshot.docs.map(doc => {
@@ -138,6 +146,11 @@ export default function AdminDashboardPage() {
             });
             setContacts(contactList);
 
+            // Site Settings
+            const announcementDoc = await getDoc(doc(db, "site_settings", "announcement"));
+            if (announcementDoc.exists()) {
+                setSiteSettings(announcementDoc.data() as SiteSettings);
+            }
 
         } catch (error) {
             console.error("Error fetching data: ", error);
@@ -302,8 +315,15 @@ export default function AdminDashboardPage() {
         
         try {
             if (activeTab === 'courses') {
-                const courseData = { ...formData, image: formData.image || `https://picsum.photos/seed/${formData.title || 'course'}/600/400` };
+                const courseData = { 
+                    ...formData, 
+                    image: formData.image || `https://picsum.photos/seed/${formData.title || 'course'}/600/400`,
+                };
                 delete courseData.id;
+                // Ensure prices are stored as strings
+                courseData.actualPrice = String(courseData.actualPrice || '');
+                courseData.discountPrice = String(courseData.discountPrice || '');
+
                 if (editingItem) {
                     const courseDoc = doc(db, "courses", (editingItem as Course).id);
                     await updateDoc(courseDoc, courseData);
@@ -357,6 +377,27 @@ export default function AdminDashboardPage() {
         const { name, value } = e.target;
         setSettingsFormData({ ...settingsFormData, [name]: value });
     };
+
+    const handleSiteSettingsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setSiteSettings({ ...siteSettings, [name]: value });
+    };
+
+    const handleSiteSettingsSwitchChange = (checked: boolean) => {
+        setSiteSettings({ ...siteSettings, isVisible: checked });
+    };
+
+    const handleSiteSettingsSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await setDoc(doc(db, "site_settings", "announcement"), siteSettings, { merge: true });
+            toast({ title: "Success", description: "Site settings updated successfully." });
+        } catch (error) {
+            console.error("Error updating site settings:", error);
+            toast({ title: "Error", description: "Could not update site settings.", variant: "destructive" });
+        }
+    };
+
 
     const handleSettingsSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -445,9 +486,15 @@ export default function AdminDashboardPage() {
                         <Label htmlFor="description">Description</Label>
                         <Textarea id="description" name="description" value={formData.description || ''} onChange={handleFormChange} />
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="fees">Fees</Label>
-                        <Input id="fees" name="fees" value={formData.fees || ''} onChange={handleFormChange} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="actualPrice">Actual Price</Label>
+                            <Input id="actualPrice" name="actualPrice" value={formData.actualPrice || ''} onChange={handleFormChange} placeholder="e.g., 5000" />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="discountPrice">Discount Price</Label>
+                            <Input id="discountPrice" name="discountPrice" value={formData.discountPrice || ''} onChange={handleFormChange} placeholder="e.g., 3500" required/>
+                        </div>
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="duration">Duration</Label>
@@ -545,10 +592,11 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="internal-links"><Link2 className="mr-2 h-4 w-4"/>Internal Links</TabsTrigger>
                                 <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
                                 <TabsTrigger value="contacts"><MessageSquare className="mr-2 h-4 w-4"/>Contacts</TabsTrigger>
+                                <TabsTrigger value="site-settings"><Megaphone className="mr-2 h-4 w-4"/>Site Settings</TabsTrigger>
                                 <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
                             </TabsList>
                              <div className="ml-auto flex items-center gap-2">
-                                {activeTab !== 'settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && activeTab !== 'internal-links' && (
+                                {activeTab !== 'settings' && activeTab !== 'site-settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && activeTab !== 'internal-links' && (
                                 <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -572,7 +620,7 @@ export default function AdminDashboardPage() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Title</TableHead>
-                                                <TableHead>Fees</TableHead>
+                                                <TableHead>Price</TableHead>
                                                 <TableHead>Duration</TableHead>
                                                 <TableHead>
                                                     <span className="sr-only">Actions</span>
@@ -583,7 +631,7 @@ export default function AdminDashboardPage() {
                                             {courses.map(course => (
                                                 <TableRow key={course.id}>
                                                     <TableCell className="font-medium">{course.title}</TableCell>
-                                                    <TableCell>{course.fees}</TableCell>
+                                                    <TableCell>{course.discountPrice}</TableCell>
                                                     <TableCell>{course.duration}</TableCell>
                                                     <TableCell className="text-right">
                                                         <DropdownMenu>
@@ -945,6 +993,36 @@ export default function AdminDashboardPage() {
                                         </TableBody>
                                     </Table>
                                      }
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="site-settings">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Site Settings</CardTitle>
+                                    <CardDescription>Manage global settings for your website, like the announcement bar.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <form onSubmit={handleSiteSettingsSubmit} className="space-y-6 max-w-lg">
+                                        <div>
+                                            <h3 className="text-lg font-medium">Announcement Bar</h3>
+                                            <p className="text-sm text-muted-foreground">This bar will appear at the top of your site.</p>
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="announcementText">Announcement Text</Label>
+                                            <Textarea id="announcementText" name="text" value={siteSettings.text} onChange={handleSiteSettingsChange} placeholder="E.g., ✨ New batches starting soon! 20% off on all courses." />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="announcementLink">Link (Optional)</Label>
+                                            <Input id="announcementLink" name="link" value={siteSettings.link} onChange={handleSiteSettingsChange} placeholder="/courses" />
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Switch id="announcementVisibility" name="isVisible" checked={siteSettings.isVisible} onCheckedChange={handleSiteSettingsSwitchChange} />
+                                            <Label htmlFor="announcementVisibility">Show Announcement Bar</Label>
+                                        </div>
+
+                                        <Button type="submit">Save Site Settings</Button>
+                                    </form>
                                 </CardContent>
                             </Card>
                         </TabsContent>

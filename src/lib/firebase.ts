@@ -1,8 +1,8 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import { getFirestore, collection, query, where, getDocs, orderBy, doc, getDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import type { BlogPost } from "./types";
+import type { BlogPost, SiteSettings } from "./types";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -56,6 +56,20 @@ export async function getPostsByTag(tag: string): Promise<BlogPost[]> {
     posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return posts;
+}
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+    try {
+        const docRef = doc(db, 'site_settings', 'announcement');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return docSnap.data() as SiteSettings;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching site settings:", error);
+        return null;
+    }
 }
 
 
