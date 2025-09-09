@@ -17,7 +17,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-black/50" />
       <div className="container relative z-10 flex min-h-[60vh] flex-col items-center justify-center text-center py-20">
         
-        <div className="absolute top-1/4 left-8 md:left-16 transform -translate-y-1/2 z-20">
+        <div className="absolute top-8 left-4 md:top-16 md:left-16 z-20">
           <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 p-3 pr-5 text-sm font-medium text-white shadow-lg backdrop-blur-md transition-all hover:bg-white/20">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/80 animate-pulse">
               <Award className="h-6 w-6" />
