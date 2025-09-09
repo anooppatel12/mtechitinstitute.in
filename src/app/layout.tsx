@@ -28,6 +28,9 @@ const siteUrl =
 
 const faviconUrl = "https://res.cloudinary.com/dzr4xjizf/image/upload/v1757138798/mtechlogo_1_wsdhhx.png";
 
+// This forces the layout to be dynamically rendered, ensuring data is always fresh
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
