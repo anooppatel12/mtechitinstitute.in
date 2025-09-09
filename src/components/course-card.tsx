@@ -48,13 +48,13 @@ export default function CourseCard({ course }: CourseCardProps) {
             </div>
             <div className="flex items-center gap-2 font-semibold text-primary">
                  {course.actualPrice && (
-                    <span className="text-muted-foreground line-through">
-                        ₹{course.actualPrice}
+                    <span className="text-muted-foreground line-through flex items-center">
+                        <IndianRupee className="h-4 w-4" />{course.actualPrice}
                     </span>
                   )}
                   <span className="text-accent flex items-center">
                     <Tag className="h-4 w-4 mr-1" />
-                    ₹{course.discountPrice}
+                    <IndianRupee className="h-4 w-4" />{course.discountPrice}
                   </span>
             </div>
         </div>
