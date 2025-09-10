@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { X, Search } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 
 export default function BlogPage() {
