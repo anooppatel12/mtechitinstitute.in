@@ -54,6 +54,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -512,7 +513,7 @@ export default function AdminDashboardPage() {
                         <Label htmlFor="description">Description</Label>
                         <Textarea id="description" name="description" value={formData.description || ''} onChange={handleFormChange} />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="grid gap-2">
                             <Label htmlFor="actualPrice">Actual Price</Label>
                             <Input id="actualPrice" name="actualPrice" value={formData.actualPrice || ''} onChange={handleFormChange} placeholder="e.g., 5000" />
@@ -610,19 +611,22 @@ export default function AdminDashboardPage() {
                 <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
                     <Tabs defaultValue="courses" onValueChange={(value) => setActiveTab(value as ItemType)}>
                         <div className="flex items-center">
-                            <TabsList>
-                                <TabsTrigger value="courses">Courses</TabsTrigger>
-                                <TabsTrigger value="blog">Blog Posts</TabsTrigger>
-                                <TabsTrigger value="guidance"><Briefcase className="mr-2 h-4 w-4"/>Career Guidance</TabsTrigger>
-                                <TabsTrigger value="resources">Resources</TabsTrigger>
-                                <TabsTrigger value="reviews"><Star className="mr-2 h-4 w-4" />Reviews</TabsTrigger>
-                                <TabsTrigger value="internal-links"><Link2 className="mr-2 h-4 w-4"/>Internal Links</TabsTrigger>
-                                <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
-                                <TabsTrigger value="contacts"><MessageSquare className="mr-2 h-4 w-4"/>Contacts</TabsTrigger>
-                                <TabsTrigger value="site-settings"><Megaphone className="mr-2 h-4 w-4"/>Site Settings</TabsTrigger>
-                                <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
-                            </TabsList>
-                             <div className="ml-auto flex items-center gap-2">
+                            <ScrollArea className="w-full whitespace-nowrap">
+                                <TabsList className="inline-flex">
+                                    <TabsTrigger value="courses">Courses</TabsTrigger>
+                                    <TabsTrigger value="blog">Blog Posts</TabsTrigger>
+                                    <TabsTrigger value="guidance"><Briefcase className="mr-2 h-4 w-4"/>Career Guidance</TabsTrigger>
+                                    <TabsTrigger value="resources">Resources</TabsTrigger>
+                                    <TabsTrigger value="reviews"><Star className="mr-2 h-4 w-4" />Reviews</TabsTrigger>
+                                    <TabsTrigger value="internal-links"><Link2 className="mr-2 h-4 w-4"/>Internal Links</TabsTrigger>
+                                    <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
+                                    <TabsTrigger value="contacts"><MessageSquare className="mr-2 h-4 w-4"/>Contacts</TabsTrigger>
+                                    <TabsTrigger value="site-settings"><Megaphone className="mr-2 h-4 w-4"/>Site Settings</TabsTrigger>
+                                    <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
+                                </TabsList>
+                                <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                             <div className="ml-auto flex items-center gap-2 pl-4">
                                 {activeTab !== 'settings' && activeTab !== 'site-settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && activeTab !== 'internal-links' && activeTab !== 'reviews' && (
                                 <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
@@ -646,9 +650,10 @@ export default function AdminDashboardPage() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
+                                                <TableHead className="hidden sm:table-cell">Image</TableHead>
                                                 <TableHead>Title</TableHead>
                                                 <TableHead>Price</TableHead>
-                                                <TableHead>Duration</TableHead>
+                                                <TableHead className="hidden md:table-cell">Duration</TableHead>
                                                 <TableHead>
                                                     <span className="sr-only">Actions</span>
                                                 </TableHead>
@@ -657,9 +662,12 @@ export default function AdminDashboardPage() {
                                         <TableBody>
                                             {courses.map(course => (
                                                 <TableRow key={course.id}>
+                                                    <TableCell className="hidden sm:table-cell">
+                                                        <img alt="Course image" className="aspect-square rounded-md object-cover" height="64" src={course.image} width="64"/>
+                                                    </TableCell>
                                                     <TableCell className="font-medium">{course.title}</TableCell>
                                                     <TableCell>{course.discountPrice}</TableCell>
-                                                    <TableCell>{course.duration}</TableCell>
+                                                    <TableCell className="hidden md:table-cell">{course.duration}</TableCell>
                                                     <TableCell className="text-right">
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
@@ -700,8 +708,8 @@ export default function AdminDashboardPage() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Title</TableHead>
-                                                <TableHead>Author</TableHead>
-                                                <TableHead>Date</TableHead>
+                                                <TableHead className="hidden sm:table-cell">Author</TableHead>
+                                                <TableHead className="hidden md:table-cell">Date</TableHead>
                                                 <TableHead>
                                                     <span className="sr-only">Actions</span>
                                                 </TableHead>
@@ -711,8 +719,8 @@ export default function AdminDashboardPage() {
                                             {blogPosts.map(post => (
                                                 <TableRow key={post.slug}>
                                                     <TableCell className="font-medium">{post.title}</TableCell>
-                                                    <TableCell>{post.author}</TableCell>
-                                                    <TableCell>{post.date}</TableCell>
+                                                    <TableCell className="hidden sm:table-cell">{post.author}</TableCell>
+                                                    <TableCell className="hidden md:table-cell">{post.date}</TableCell>
                                                     <TableCell className="text-right">
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
@@ -753,8 +761,8 @@ export default function AdminDashboardPage() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Title</TableHead>
-                                                <TableHead>Author</TableHead>
-                                                <TableHead>Date</TableHead>
+                                                <TableHead className="hidden sm:table-cell">Author</TableHead>
+                                                <TableHead className="hidden md:table-cell">Date</TableHead>
                                                 <TableHead>
                                                     <span className="sr-only">Actions</span>
                                                 </TableHead>
@@ -764,8 +772,8 @@ export default function AdminDashboardPage() {
                                             {guidanceArticles.map(post => (
                                                 <TableRow key={post.slug}>
                                                     <TableCell className="font-medium">{post.title}</TableCell>
-                                                    <TableCell>{post.author}</TableCell>
-                                                    <TableCell>{post.date}</TableCell>
+                                                    <TableCell className="hidden sm:table-cell">{post.author}</TableCell>
+                                                    <TableCell className="hidden md:table-cell">{post.date}</TableCell>
                                                     <TableCell className="text-right">
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
@@ -857,9 +865,9 @@ export default function AdminDashboardPage() {
                                             <TableHeader>
                                                 <TableRow>
                                                     <TableHead>Name</TableHead>
-                                                    <TableHead>Rating</TableHead>
+                                                    <TableHead className="hidden sm:table-cell">Rating</TableHead>
                                                     <TableHead>Comment</TableHead>
-                                                    <TableHead>Submitted</TableHead>
+                                                    <TableHead className="hidden md:table-cell">Submitted</TableHead>
                                                     <TableHead>Approved</TableHead>
                                                     <TableHead className="text-right">Actions</TableHead>
                                                 </TableRow>
@@ -868,15 +876,15 @@ export default function AdminDashboardPage() {
                                                 {reviews.map(review => (
                                                     <TableRow key={review.id}>
                                                         <TableCell className="font-medium">{review.name}</TableCell>
-                                                        <TableCell>
+                                                        <TableCell className="hidden sm:table-cell">
                                                             <div className="flex items-center">
                                                                 {Array.from({ length: 5 }).map((_, i) => (
                                                                     <Star key={i} className={cn("h-4 w-4", i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground")} />
                                                                 ))}
                                                             </div>
                                                         </TableCell>
-                                                        <TableCell className="max-w-xs truncate">{review.comment}</TableCell>
-                                                        <TableCell>{review.submittedAt}</TableCell>
+                                                        <TableCell className="max-w-[200px] sm:max-w-xs truncate">{review.comment}</TableCell>
+                                                        <TableCell className="hidden md:table-cell">{review.submittedAt}</TableCell>
                                                         <TableCell>
                                                             <Switch
                                                                 checked={review.isApproved}
@@ -980,8 +988,8 @@ export default function AdminDashboardPage() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Name</TableHead>
-                                                <TableHead>Email</TableHead>
-                                                <TableHead>Phone</TableHead>
+                                                <TableHead className="hidden sm:table-cell">Email</TableHead>
+                                                <TableHead className="hidden md:table-cell">Phone</TableHead>
                                                 <TableHead>Submitted At</TableHead>
                                                 <TableHead>
                                                     <span className="sr-only">Actions</span>
@@ -992,8 +1000,8 @@ export default function AdminDashboardPage() {
                                             {enrollments.map(enrollment => (
                                                 <TableRow key={enrollment.id}>
                                                     <TableCell className="font-medium">{enrollment.name}</TableCell>
-                                                    <TableCell>{enrollment.email}</TableCell>
-                                                     <TableCell>{enrollment.phone}</TableCell>
+                                                    <TableCell className="hidden sm:table-cell">{enrollment.email}</TableCell>
+                                                     <TableCell className="hidden md:table-cell">{enrollment.phone}</TableCell>
                                                     <TableCell>{enrollment.submittedAt}</TableCell>
                                                     <TableCell className="text-right">
                                                          <DropdownMenu>
@@ -1034,9 +1042,9 @@ export default function AdminDashboardPage() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Name</TableHead>
-                                                <TableHead>Email</TableHead>
+                                                <TableHead className="hidden sm:table-cell">Email</TableHead>
                                                 <TableHead>Message</TableHead>
-                                                <TableHead>Submitted At</TableHead>
+                                                <TableHead className="hidden md:table-cell">Submitted At</TableHead>
                                                 <TableHead>
                                                     <span className="sr-only">Actions</span>
                                                 </TableHead>
@@ -1046,9 +1054,9 @@ export default function AdminDashboardPage() {
                                             {contacts.map(contact => (
                                                 <TableRow key={contact.id}>
                                                     <TableCell className="font-medium">{contact.name}</TableCell>
-                                                    <TableCell>{contact.email}</TableCell>
-                                                    <TableCell className="max-w-xs truncate">{contact.message}</TableCell>
-                                                    <TableCell>{contact.submittedAt}</TableCell>
+                                                    <TableCell className="hidden sm:table-cell">{contact.email}</TableCell>
+                                                    <TableCell className="max-w-[200px] sm:max-w-xs truncate">{contact.message}</TableCell>
+                                                    <TableCell className="hidden md:table-cell">{contact.submittedAt}</TableCell>
                                                     <TableCell className="text-right">
                                                          <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
