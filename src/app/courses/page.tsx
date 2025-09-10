@@ -1,22 +1,10 @@
 
 import React from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, IndianRupee, BookOpen, Tag } from "lucide-react";
-import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import type { Course } from "@/lib/types";
-import { EnrollModal } from "@/components/enroll-modal";
-import { courseSchema } from "@/lib/schema";
-import { JsonLd } from "@/components/json-ld";
 import type { Metadata } from "next";
+import CoursesClient from "@/components/courses-client";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
@@ -62,72 +50,9 @@ export default async function CoursesPage() {
             Find the perfect job-oriented computer course in Patti to advance your skills and launch your career in the tech industry.
           </p>
         </div>
+        
+        <CoursesClient courses={courses} />
 
-        <div className="space-y-12">
-          {courses.map((course, index) => (
-            <React.Fragment key={course.id}>
-              <JsonLd data={courseSchema(course)} />
-              <Card className="overflow-hidden shadow-lg grid grid-cols-1 md:grid-cols-2">
-                <div className="relative min-h-[250px] md:min-h-full">
-                  <Image
-                    src={course.image}
-                    alt={`${course.title} course banner`}
-                    data-ai-hint={course.title.split(' ').slice(0,2).join(' ').toLowerCase()}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6 md:p-8 flex flex-col">
-                  <CardHeader className="p-0">
-                    <CardTitle className="font-headline text-2xl mb-2 text-primary">{course.title} Course</CardTitle>
-                    <CardDescription>{course.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0 mt-4 flex-grow">
-                    <div className="flex items-center justify-between text-muted-foreground text-sm mb-4">
-                      <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          <span>Duration: {course.duration}</span>
-                      </div>
-                      <div className="flex items-center gap-2 font-semibold text-lg text-primary">
-                          {course.actualPrice && (
-                             <span className="flex items-center text-base text-muted-foreground line-through">
-                               <IndianRupee className="h-4 w-4" /> {course.actualPrice}
-                            </span>
-                          )}
-                           <span className="flex items-center text-accent">
-                             <Tag className="h-5 w-5 mr-1" />
-                             <IndianRupee className="h-5 w-5" /> {course.discountPrice}
-                           </span>
-                      </div>
-                    </div>
-                    <Accordion type="single" collapsible>
-                      <AccordionItem value="item-1">
-                        <AccordionTrigger className="text-base font-semibold">
-                          <div className="flex items-center gap-2">
-                            <BookOpen className="h-5 w-5" />
-                            <span>View Syllabus</span>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <ul className="list-disc pl-6 space-y-1 mt-2 text-foreground/80">
-                            {course.syllabus.map((item, i) => (
-                              <li key={i}>{item}</li>
-                            ))}
-                          </ul>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </CardContent>
-                  <CardFooter className="p-0 mt-6">
-                      <EnrollModal>
-                        <Button className="w-full" size="lg">Enroll Now</Button>
-                      </EnrollModal>
-                  </CardFooter>
-                </div>
-              </Card>
-            </React.Fragment>
-          ))}
-        </div>
       </div>
     </div>
   );

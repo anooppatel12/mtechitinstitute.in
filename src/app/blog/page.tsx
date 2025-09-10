@@ -1,68 +1,33 @@
 
+"use client";
+
+import { useState, useMemo } from "react";
 import BlogCard from "@/components/blog-card";
 import AdPlaceholder from "@/components/ad-placeholder";
 import type { BlogPost } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import type { Metadata } from "next";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { X, Search } from "lucide-react";
 import Link from "next/link";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
+// Note: This is now a client component. 
+// For a production app with a lot of posts, you might move fetching into a hook
+// or use server-side search. For now, we'll assume the data is passed as props.
+// To keep SEO benefits, we can fetch data in a parent Server Component, which we will do.
 
-export const metadata: Metadata = {
-  title: "Tech Blog & Career Guidance After 12th - MTech IT Institute",
-  description: "Read our latest blog articles on IT, technology trends, coding tutorials, and career guidance for students and professionals.",
-  keywords: ["tech blog", "IT articles", "career guidance after 12th", "learn coding", "latest technology trends"],
-  alternates: {
-    canonical: `${siteUrl}/blog`,
-  },
-  openGraph: {
-    title: "Tech Blog & Career Guidance After 12th - MTech IT Institute",
-    description: "Read our latest blog articles on IT, technology trends, coding tutorials, and career guidance for students and professionals.",
-    url: `${siteUrl}/blog`,
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: "Tech Blog & Career Guidance After 12th - MTech IT Institute",
-    description: "Read our latest blog articles on IT, technology trends, coding tutorials, and career guidance for students and professionals.",
-  },
-};
+export default function BlogPageClient({ posts, popularTags }: { posts: BlogPost[], popularTags: string[] }) {
+  const [searchTerm, setSearchTerm] = useState("");
 
-// This forces the page to be dynamically rendered, ensuring data is always fresh
-export const revalidate = 0;
-
-async function getPosts(): Promise<{ posts: BlogPost[], popularTags: string[] }> {
-    const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
-    const blogSnapshot = await getDocs(blogQuery);
-    const posts = blogSnapshot.docs.map(doc => {
-        const data = doc.data() as Omit<BlogPost, 'slug' | 'summary'>;
-        const snippet = data.content.replace(/<[^>]+>/g, '').substring(0, 150);
-        return { 
-            ...data, 
-            slug: doc.id,
-            summary: `${snippet}...` 
-        } as BlogPost;
-    });
-
-    const tagCounts: Record<string, number> = {};
-    posts.forEach(post => {
-        (post.tags || []).forEach(tag => {
-            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
-    });
-
-    const popularTags = Object.entries(tagCounts)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10)
-        .map(([tag]) => tag);
-
-    return { posts, popularTags };
-}
-
-export default async function BlogPage() {
-  const { posts, popularTags } = await getPosts();
+  const filteredPosts = useMemo(() => {
+    if (!searchTerm) {
+      return posts;
+    }
+    return posts.filter(post =>
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.summary?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [posts, searchTerm]);
 
   return (
     <div className="bg-secondary">
@@ -76,10 +41,32 @@ export default async function BlogPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
             <main className="lg:col-span-3">
+                <div className="mb-8 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                        type="text"
+                        placeholder="Search articles..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 text-base"
+                    />
+                    {searchTerm && (
+                        <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setSearchTerm('')}>
+                           <X className="h-5 w-5" />
+                        </Button>
+                    )}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {posts.map((post) => (
-                        <BlogCard key={post.slug} post={post} />
-                    ))}
+                    {filteredPosts.length > 0 ? (
+                      filteredPosts.map((post) => (
+                          <BlogCard key={post.slug} post={post} />
+                      ))
+                    ) : (
+                       <div className="md:col-span-2 text-center py-12">
+                          <p className="text-lg text-muted-foreground">No articles found matching your search.</p>
+                       </div>
+                    )}
                 </div>
             </main>
             <aside className="lg:col-span-1 space-y-8">
