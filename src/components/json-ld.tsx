@@ -1,3 +1,4 @@
+
 // src/components/json-ld.tsx
 import { Thing, WithContext } from 'schema-dts';
 
