@@ -5,11 +5,15 @@ import Logo from "./logo";
 import { navItems } from "@/lib/data";
 
 export default function Footer() {
-  const footerQuickLinks = [
-    ...navItems,
-    { title: "Reviews", href: "/reviews" },
+  const primaryLinks = navItems.slice(0, 4); // Home, About, Courses, Blog
+  const secondaryLinks = [
+      ...navItems.slice(4), // Career Guidance, Resources, Contact
+      { title: "Reviews", href: "/reviews" },
+  ];
+  const legalLinks = [
     { title: "Privacy Policy", href: "/privacy-policy" },
     { title: "Terms & Conditions", href: "/terms-and-conditions" },
+    { title: "Admin Login", href: "/admin/login" },
   ];
   
   return (
@@ -25,9 +29,9 @@ export default function Footer() {
         </div>
 
         {/* Middle Section: Links and Contact */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             {/* Contact Info */}
-            <div className="space-y-3">
+            <div className="space-y-3 md:col-span-2">
                  <h3 className="font-headline text-lg font-semibold">Contact Us</h3>
                  <div className="flex items-center justify-center md:justify-start gap-2 text-sm">
                     <MapPin className="w-4 h-4 text-accent flex-shrink-0"/>
@@ -47,25 +51,29 @@ export default function Footer() {
             <div className="space-y-3">
                  <h3 className="font-headline text-lg font-semibold">Quick Links</h3>
                  <ul className="space-y-2 text-sm">
-                  {footerQuickLinks.map((item) => (
+                  {[...primaryLinks, ...secondaryLinks].map((item) => (
                     <li key={item.href}>
                       <Link href={item.href} className="hover:text-accent transition-colors">
                         {item.title}
                       </Link>
                     </li>
                   ))}
-                   <li>
-                      <Link href="/admin/login" className="hover:text-accent transition-colors">
-                        Admin Login
-                      </Link>
-                    </li>
                 </ul>
             </div>
             
-            {/* Follow Us */}
+            {/* Legal Links and Socials */}
             <div className="space-y-3">
-                 <h3 className="font-headline text-lg font-semibold">Follow Us</h3>
-                 <div className="flex space-x-4 justify-center md:justify-start">
+                 <h3 className="font-headline text-lg font-semibold invisible">More</h3>
+                 <ul className="space-y-2 text-sm">
+                  {legalLinks.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} className="hover:text-accent transition-colors">
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                 <div className="flex space-x-4 justify-center md:justify-start pt-4">
                   <Link href="https://wa.me/918299809562" aria-label="WhatsApp" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Send className="w-5 h-5" />
                   </Link>
