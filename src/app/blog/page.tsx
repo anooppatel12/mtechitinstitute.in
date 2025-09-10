@@ -20,10 +20,11 @@ export default function BlogPageClient({ posts, popularTags }: { posts: BlogPost
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredPosts = useMemo(() => {
+    const postList = posts || [];
     if (!searchTerm) {
-      return posts;
+      return postList;
     }
-    return posts.filter(post =>
+    return postList.filter(post =>
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.summary?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -58,7 +59,7 @@ export default function BlogPageClient({ posts, popularTags }: { posts: BlogPost
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {filteredPosts.length > 0 ? (
+                    {filteredPosts && filteredPosts.length > 0 ? (
                       filteredPosts.map((post) => (
                           <BlogCard key={post.slug} post={post} />
                       ))
