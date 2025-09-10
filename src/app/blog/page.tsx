@@ -74,7 +74,7 @@ export default function BlogPageClient({ posts, popularTags }: { posts: BlogPost
                 <div className="p-6 bg-background rounded-lg shadow-sm">
                     <h3 className="font-headline text-lg font-semibold text-primary mb-4">Popular Tags</h3>
                     <div className="flex flex-wrap gap-2">
-                        {popularTags.map(tag => (
+                        {popularTags && popularTags.map(tag => (
                             <Link href={`/blog/tag/${tag}`} key={tag}>
                                 <Badge variant="outline">{tag}</Badge>
                             </Link>
