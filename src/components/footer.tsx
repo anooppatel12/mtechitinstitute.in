@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { Facebook, Instagram, Phone, Mail, MapPin, Send } from "lucide-react";
 import Logo from "./logo";
@@ -12,38 +13,42 @@ export default function Footer() {
   ];
   
   return (
-    <footer className="bg-secondary text-secondary-foreground">
-      <div className="container py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Institute Info */}
-          <div className="space-y-4 lg:col-span-5">
+    <footer className="bg-secondary text-secondary-foreground border-t">
+      <div className="container py-12 text-center md:text-left">
+        
+        {/* Top Section: Logo and Description */}
+        <div className="flex flex-col items-center md:items-start mb-8">
             <Logo />
-            <p className="text-sm max-w-md">
+            <p className="text-sm max-w-md mt-4 text-center md:text-left">
               MTech IT Institute is dedicated to providing top-quality IT training and computer courses to empower students for a successful career in technology.
             </p>
-            <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-accent"/>
+        </div>
+
+        {/* Middle Section: Links and Contact */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            {/* Contact Info */}
+            <div className="space-y-3">
+                 <h3 className="font-headline text-lg font-semibold">Contact Us</h3>
+                 <div className="flex items-center justify-center md:justify-start gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-accent flex-shrink-0"/>
                     <span>Patti Pratapgarh, 230135, Uttar Pradesh.</span>
                 </div>
-                 <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-accent"/>
+                 <div className="flex items-center justify-center md:justify-start gap-2 text-sm">
+                    <Phone className="w-4 h-4 text-accent flex-shrink-0"/>
                     <span>7800413348, 8299809562</span>
                 </div>
-                 <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-accent"/>
+                 <div className="flex items-center justify-center md:justify-start gap-2 text-sm">
+                    <Mail className="w-4 h-4 text-accent flex-shrink-0"/>
                     <span>mtechitinstitute@gmail.com</span>
                 </div>
             </div>
-          </div>
 
-          {/* Quick Links and Social Media */}
-          <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-8">
-             <div className="md:col-span-2">
-                <h3 className="font-headline text-lg font-semibold mb-4">Quick Links</h3>
-                <ul className="space-y-2 text-sm columns-2 md:columns-1">
+            {/* Quick Links */}
+            <div className="space-y-3">
+                 <h3 className="font-headline text-lg font-semibold">Quick Links</h3>
+                 <ul className="space-y-2 text-sm">
                   {footerQuickLinks.map((item) => (
-                    <li key={item.href} className="break-inside-avoid">
+                    <li key={item.href}>
                       <Link href={item.href} className="hover:text-accent transition-colors">
                         {item.title}
                       </Link>
@@ -55,12 +60,13 @@ export default function Footer() {
                       </Link>
                     </li>
                 </ul>
-              </div>
-
-              <div>
-                <h3 className="font-headline text-lg font-semibold mb-4">Follow Us</h3>
-                <div className="flex space-x-4">
-                  <Link href="#contact" aria-label="WhatsApp" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
+            </div>
+            
+            {/* Follow Us */}
+            <div className="space-y-3">
+                 <h3 className="font-headline text-lg font-semibold">Follow Us</h3>
+                 <div className="flex space-x-4 justify-center md:justify-start">
+                  <Link href="https://wa.me/918299809562" aria-label="WhatsApp" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
                     <Send className="w-5 h-5" />
                   </Link>
                   <Link href="https://www.facebook.com/people/Mtech-it-institute/61562000094984/?mibextid=ZbWKwL" aria-label="Facebook" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
@@ -70,11 +76,11 @@ export default function Footer() {
                     <Instagram className="w-5 h-5" />
                   </Link>
                 </div>
-              </div>
-          </div>
+            </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-border text-center text-sm">
+        {/* Bottom Section: Copyright */}
+        <div className="pt-6 border-t border-border/50 text-center text-sm">
           <p>&copy; {new Date().getFullYear()} MTech IT Institute. All Rights Reserved.</p>
         </div>
       </div>
