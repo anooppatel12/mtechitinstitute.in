@@ -6,6 +6,7 @@ import { navItems } from "@/lib/data";
 export default function Footer() {
   const footerQuickLinks = [
     ...navItems,
+    { title: "Reviews", href: "/reviews" },
     { title: "Privacy Policy", href: "/privacy-policy" },
     { title: "Terms & Conditions", href: "/terms-and-conditions" },
   ];
