@@ -4,7 +4,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare, Briefcase, Link2, Megaphone } from "lucide-react";
+import { PlusCircle, MoreHorizontal, LogOut, Trash, Edit, Settings, FileText, MessageSquare, Briefcase, Link2, Megaphone, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,15 +61,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Logo from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import type { Course, BlogPost, Resource, Enrollment, ContactSubmission, InternalLink, SiteSettings } from "@/lib/types";
+import type { Course, BlogPost, Resource, Enrollment, ContactSubmission, InternalLink, SiteSettings, Review } from "@/lib/types";
 import { db, auth } from "@/lib/firebase";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc, Timestamp, where, arrayUnion, arrayRemove, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { signOut, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 
-type ItemType = 'courses' | 'blog' | 'guidance' | 'resources' | 'settings' | 'enrollments' | 'contacts' | 'internal-links' | 'site-settings';
+type ItemType = 'courses' | 'blog' | 'guidance' | 'resources' | 'settings' | 'enrollments' | 'contacts' | 'internal-links' | 'site-settings' | 'reviews';
 
 export default function AdminDashboardPage() {
     const [user, authLoading, authError] = useAuthState(auth);
@@ -80,6 +81,7 @@ export default function AdminDashboardPage() {
     const [resources, setResources] = useState<Resource[]>([]);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
     const [contacts, setContacts] = useState<ContactSubmission[]>([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
@@ -146,6 +148,16 @@ export default function AdminDashboardPage() {
             });
             setContacts(contactList);
 
+            // Reviews
+            const reviewsQuery = query(collection(db, "reviews"), orderBy("submittedAt", "desc"));
+            const reviewsSnapshot = await getDocs(reviewsQuery);
+            const reviewList = reviewsSnapshot.docs.map(doc => {
+                const data = doc.data();
+                const submittedAt = (data.submittedAt as Timestamp)?.toDate().toLocaleString() || new Date().toLocaleString();
+                return { id: doc.id, ...data, submittedAt } as Review;
+            });
+            setReviews(reviewList);
+
             // Site Settings
             const announcementDoc = await getDoc(doc(db, "site_settings", "announcement"));
             if (announcementDoc.exists()) {
@@ -196,6 +208,7 @@ export default function AdminDashboardPage() {
                 if (type === 'resources') await deleteDoc(doc(db, "resources", id));
                 if (type === 'enrollments') await deleteDoc(doc(db, "enrollments", id));
                 if (type === 'contacts') await deleteDoc(doc(db, "contacts", id));
+                if (type === 'reviews') await deleteDoc(doc(db, "reviews", id));
                 await fetchData(); // Refetch all data
                 toast({ title: "Success", description: "Item deleted successfully." });
             } catch (error) {
@@ -386,6 +399,19 @@ export default function AdminDashboardPage() {
     const handleSiteSettingsSwitchChange = (checked: boolean) => {
         setSiteSettings({ ...siteSettings, isVisible: checked });
     };
+    
+    const handleApprovalChange = async (reviewId: string, isApproved: boolean) => {
+        try {
+            const reviewRef = doc(db, "reviews", reviewId);
+            await updateDoc(reviewRef, { isApproved });
+            setReviews(reviews.map(r => r.id === reviewId ? { ...r, isApproved } : r));
+            toast({ title: "Success", description: `Review ${isApproved ? 'approved' : 'unapproved'}.` });
+        } catch (error) {
+            console.error("Error updating review status:", error);
+            toast({ title: "Error", description: "Could not update review status.", variant: "destructive" });
+        }
+    };
+
 
     const handleSiteSettingsSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -589,6 +615,7 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="blog">Blog Posts</TabsTrigger>
                                 <TabsTrigger value="guidance"><Briefcase className="mr-2 h-4 w-4"/>Career Guidance</TabsTrigger>
                                 <TabsTrigger value="resources">Resources</TabsTrigger>
+                                <TabsTrigger value="reviews"><Star className="mr-2 h-4 w-4" />Reviews</TabsTrigger>
                                 <TabsTrigger value="internal-links"><Link2 className="mr-2 h-4 w-4"/>Internal Links</TabsTrigger>
                                 <TabsTrigger value="enrollments"><FileText className="mr-2 h-4 w-4"/>Enrollments</TabsTrigger>
                                 <TabsTrigger value="contacts"><MessageSquare className="mr-2 h-4 w-4"/>Contacts</TabsTrigger>
@@ -596,7 +623,7 @@ export default function AdminDashboardPage() {
                                 <TabsTrigger value="settings"><Settings className="mr-2 h-4 w-4"/>Settings</TabsTrigger>
                             </TabsList>
                              <div className="ml-auto flex items-center gap-2">
-                                {activeTab !== 'settings' && activeTab !== 'site-settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && activeTab !== 'internal-links' && (
+                                {activeTab !== 'settings' && activeTab !== 'site-settings' && activeTab !== 'enrollments' && activeTab !== 'contacts' && activeTab !== 'internal-links' && activeTab !== 'reviews' && (
                                 <Button size="sm" className="h-8 gap-1" onClick={handleAddNew}>
                                     <PlusCircle className="h-3.5 w-3.5" />
                                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -815,6 +842,57 @@ export default function AdminDashboardPage() {
                                         </TableBody>
                                     </Table>
                                      }
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                         <TabsContent value="reviews">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Student Reviews</CardTitle>
+                                    <CardDescription>Manage and approve student testimonials. Approved reviews will appear on the site.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {loading ? <p>Loading reviews...</p> :
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Name</TableHead>
+                                                    <TableHead>Rating</TableHead>
+                                                    <TableHead>Comment</TableHead>
+                                                    <TableHead>Submitted</TableHead>
+                                                    <TableHead>Approved</TableHead>
+                                                    <TableHead className="text-right">Actions</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {reviews.map(review => (
+                                                    <TableRow key={review.id}>
+                                                        <TableCell className="font-medium">{review.name}</TableCell>
+                                                        <TableCell>
+                                                            <div className="flex items-center">
+                                                                {Array.from({ length: 5 }).map((_, i) => (
+                                                                    <Star key={i} className={cn("h-4 w-4", i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground")} />
+                                                                ))}
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="max-w-xs truncate">{review.comment}</TableCell>
+                                                        <TableCell>{review.submittedAt}</TableCell>
+                                                        <TableCell>
+                                                            <Switch
+                                                                checked={review.isApproved}
+                                                                onCheckedChange={(checked) => handleApprovalChange(review.id, checked)}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => openConfirmationDialog('reviews', review.id)}>
+                                                                <Trash className="h-4 w-4" />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    }
                                 </CardContent>
                             </Card>
                         </TabsContent>

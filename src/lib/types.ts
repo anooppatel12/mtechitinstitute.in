@@ -62,6 +62,15 @@ export type ContactSubmission = {
     submittedAt: string;
 }
 
+export type Review = {
+    id: string;
+    name: string;
+    rating: number;
+    comment: string;
+    submittedAt: string;
+    isApproved: boolean;
+}
+
 export type SiteSettings = {
     id: 'announcement';
     text: string;

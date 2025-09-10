@@ -103,3 +103,53 @@ export async function submitEnrollmentForm(
     };
   }
 }
+
+
+const reviewFormSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  rating: z.coerce.number().min(1).max(5),
+  comment: z.string().min(10, { message: "Review must be at least 10 characters." }),
+});
+
+export type ReviewFormState = {
+  message: string;
+  issues?: string[];
+  isSuccess?: boolean;
+};
+
+export async function submitReviewForm(
+  prevState: ReviewFormState,
+  data: FormData
+): Promise<ReviewFormState> {
+  const formData = Object.fromEntries(data);
+  const parsed = reviewFormSchema.safeParse(formData);
+
+  if (!parsed.success) {
+    const issues = parsed.error.issues.map((issue) => issue.message);
+    return {
+      message: "Invalid data. Please check your input.",
+      issues,
+      isSuccess: false,
+    };
+  }
+  
+  try {
+    const reviewData = {
+      ...parsed.data,
+      isApproved: false, // Reviews require approval
+      submittedAt: serverTimestamp(),
+    };
+    await addDoc(collection(db, "reviews"), reviewData);
+
+    return {
+      message: "Thank you for your review! It has been submitted for approval.",
+      isSuccess: true,
+    };
+  } catch(error) {
+    console.error("Error submitting review:", error);
+    return {
+      message: "An error occurred while submitting your review. Please try again.",
+      isSuccess: false,
+    }
+  }
+}
