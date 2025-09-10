@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Clock, IndianRupee, BookOpen, Tag, X, Search } from "lucide-react";
+import { Clock, IndianRupee, BookOpen, Tag, X, Search, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import type { Course } from "@/lib/types";
 import { EnrollModal } from "@/components/enroll-modal";
@@ -72,9 +72,17 @@ export default function CoursesClient({ courses }: { courses: Course[] }) {
                     </CardHeader>
                     <CardContent className="p-0 mt-4 flex-grow">
                         <div className="flex items-center justify-between text-muted-foreground text-sm mb-4">
-                        <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <span>Duration: {course.duration}</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1">
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                <span>Duration: {course.duration}</span>
+                            </div>
+                             {course.eligibility && (
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="h-4 w-4" />
+                                    <span>Eligibility: {course.eligibility}</span>
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-center gap-2 font-semibold text-lg text-primary">
                             {course.actualPrice && (

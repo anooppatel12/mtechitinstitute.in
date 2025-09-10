@@ -16,6 +16,7 @@ export type Course = {
   discountPrice: string; // Formerly 'fees'
   syllabus: string[];
   image: string;
+  eligibility?: string;
 };
 
 export type BlogPost = {

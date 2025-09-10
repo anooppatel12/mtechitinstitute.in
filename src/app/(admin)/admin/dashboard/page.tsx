@@ -523,9 +523,15 @@ export default function AdminDashboardPage() {
                             <Input id="discountPrice" name="discountPrice" value={formData.discountPrice || ''} onChange={handleFormChange} placeholder="e.g., 3500" required/>
                         </div>
                     </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="duration">Duration</Label>
-                        <Input id="duration" name="duration" value={formData.duration || ''} onChange={handleFormChange} />
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="duration">Duration</Label>
+                            <Input id="duration" name="duration" value={formData.duration || ''} onChange={handleFormChange} />
+                        </div>
+                         <div className="grid gap-2">
+                            <Label htmlFor="eligibility">Eligibility</Label>
+                            <Input id="eligibility" name="eligibility" value={formData.eligibility || ''} onChange={handleFormChange} placeholder="e.g., 10th Pass"/>
+                        </div>
                     </div>
                      <div className="grid gap-2">
                         <Label htmlFor="syllabus">Syllabus (comma-separated)</Label>
@@ -647,49 +653,52 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                     {loading ? <p>Loading courses...</p> :
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="hidden sm:table-cell">Image</TableHead>
-                                                <TableHead>Title</TableHead>
-                                                <TableHead>Price</TableHead>
-                                                <TableHead className="hidden md:table-cell">Duration</TableHead>
-                                                <TableHead>
-                                                    <span className="sr-only">Actions</span>
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {courses.map(course => (
-                                                <TableRow key={course.id}>
-                                                    <TableCell className="hidden sm:table-cell">
-                                                        <img alt="Course image" className="aspect-square rounded-md object-cover" height="64" src={course.image} width="64"/>
-                                                    </TableCell>
-                                                    <TableCell className="font-medium">{course.title}</TableCell>
-                                                    <TableCell>{course.discountPrice}</TableCell>
-                                                    <TableCell className="hidden md:table-cell">{course.duration}</TableCell>
-                                                    <TableCell className="text-right">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Toggle menu</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                <DropdownMenuSeparator />
-                                                                <DropdownMenuItem onClick={() => handleEdit(course)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('courses', course.id)}>
-                                                                    <Trash className="mr-2 h-4 w-4" />Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
+                                    <ScrollArea className="w-full whitespace-nowrap">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="hidden sm:table-cell">Image</TableHead>
+                                                    <TableHead>Title</TableHead>
+                                                    <TableHead>Price</TableHead>
+                                                    <TableHead className="hidden md:table-cell">Duration</TableHead>
+                                                    <TableHead>
+                                                        <span className="sr-only">Actions</span>
+                                                    </TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {courses.map(course => (
+                                                    <TableRow key={course.id}>
+                                                        <TableCell className="hidden sm:table-cell">
+                                                            <img alt="Course image" className="aspect-square rounded-md object-cover" height="64" src={course.image} width="64"/>
+                                                        </TableCell>
+                                                        <TableCell className="font-medium">{course.title}</TableCell>
+                                                        <TableCell>{course.discountPrice}</TableCell>
+                                                        <TableCell className="hidden md:table-cell">{course.duration}</TableCell>
+                                                        <TableCell className="text-right">
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                        <span className="sr-only">Toggle menu</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                    <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem onClick={() => handleEdit(course)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                    <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('courses', course.id)}>
+                                                                        <Trash className="mr-2 h-4 w-4" />Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                        <ScrollBar orientation="horizontal" />
+                                    </ScrollArea>
                                     }
                                 </CardContent>
                             </Card>
@@ -704,45 +713,48 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                      {loading ? <p>Loading blog posts...</p> :
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Title</TableHead>
-                                                <TableHead className="hidden sm:table-cell">Author</TableHead>
-                                                <TableHead className="hidden md:table-cell">Date</TableHead>
-                                                <TableHead>
-                                                    <span className="sr-only">Actions</span>
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {blogPosts.map(post => (
-                                                <TableRow key={post.slug}>
-                                                    <TableCell className="font-medium">{post.title}</TableCell>
-                                                    <TableCell className="hidden sm:table-cell">{post.author}</TableCell>
-                                                    <TableCell className="hidden md:table-cell">{post.date}</TableCell>
-                                                    <TableCell className="text-right">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Toggle menu</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem onClick={() => handleEdit(post)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('blog', post.slug)}>
-                                                                    <Trash className="mr-2 h-4 w-4" />Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
+                                     <ScrollArea className="w-full whitespace-nowrap">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Title</TableHead>
+                                                    <TableHead className="hidden sm:table-cell">Author</TableHead>
+                                                    <TableHead className="hidden md:table-cell">Date</TableHead>
+                                                    <TableHead>
+                                                        <span className="sr-only">Actions</span>
+                                                    </TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {blogPosts.map(post => (
+                                                    <TableRow key={post.slug}>
+                                                        <TableCell className="font-medium">{post.title}</TableCell>
+                                                        <TableCell className="hidden sm:table-cell">{post.author}</TableCell>
+                                                        <TableCell className="hidden md:table-cell">{post.date}</TableCell>
+                                                        <TableCell className="text-right">
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                        <span className="sr-only">Toggle menu</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                     <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem onClick={() => handleEdit(post)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                    <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('blog', post.slug)}>
+                                                                        <Trash className="mr-2 h-4 w-4" />Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                        <ScrollBar orientation="horizontal" />
+                                     </ScrollArea>
                                     }
                                 </CardContent>
                             </Card>
@@ -757,45 +769,48 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                      {loading ? <p>Loading articles...</p> :
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Title</TableHead>
-                                                <TableHead className="hidden sm:table-cell">Author</TableHead>
-                                                <TableHead className="hidden md:table-cell">Date</TableHead>
-                                                <TableHead>
-                                                    <span className="sr-only">Actions</span>
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {guidanceArticles.map(post => (
-                                                <TableRow key={post.slug}>
-                                                    <TableCell className="font-medium">{post.title}</TableCell>
-                                                    <TableCell className="hidden sm:table-cell">{post.author}</TableCell>
-                                                    <TableCell className="hidden md:table-cell">{post.date}</TableCell>
-                                                    <TableCell className="text-right">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Toggle menu</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem onClick={() => handleEdit(post)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('guidance', post.slug)}>
-                                                                    <Trash className="mr-2 h-4 w-4" />Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
+                                     <ScrollArea className="w-full whitespace-nowrap">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Title</TableHead>
+                                                    <TableHead className="hidden sm:table-cell">Author</TableHead>
+                                                    <TableHead className="hidden md:table-cell">Date</TableHead>
+                                                    <TableHead>
+                                                        <span className="sr-only">Actions</span>
+                                                    </TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {guidanceArticles.map(post => (
+                                                    <TableRow key={post.slug}>
+                                                        <TableCell className="font-medium">{post.title}</TableCell>
+                                                        <TableCell className="hidden sm:table-cell">{post.author}</TableCell>
+                                                        <TableCell className="hidden md:table-cell">{post.date}</TableCell>
+                                                        <TableCell className="text-right">
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                        <span className="sr-only">Toggle menu</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                     <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem onClick={() => handleEdit(post)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                    <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('guidance', post.slug)}>
+                                                                        <Trash className="mr-2 h-4 w-4" />Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                         <ScrollBar orientation="horizontal" />
+                                     </ScrollArea>
                                     }
                                 </CardContent>
                             </Card>
@@ -810,45 +825,48 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                      {loading ? <p>Loading resources...</p> :
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Title</TableHead>
-                                                <TableHead>Type</TableHead>
-                                                <TableHead>
-                                                    <span className="sr-only">Actions</span>
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {resources.map(resource => (
-                                                <TableRow key={resource.id}>
-                                                    <TableCell className="font-medium">{resource.title}</TableCell>
-                                                    <TableCell>
-                                                        <Badge variant="outline">{resource.type}</Badge>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Toggle menu</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem onClick={() => handleEdit(resource)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('resources', resource.id)}>
-                                                                    <Trash className="mr-2 h-4 w-4" />Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
+                                     <ScrollArea className="w-full whitespace-nowrap">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Title</TableHead>
+                                                    <TableHead>Type</TableHead>
+                                                    <TableHead>
+                                                        <span className="sr-only">Actions</span>
+                                                    </TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {resources.map(resource => (
+                                                    <TableRow key={resource.id}>
+                                                        <TableCell className="font-medium">{resource.title}</TableCell>
+                                                        <TableCell>
+                                                            <Badge variant="outline">{resource.type}</Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                        <span className="sr-only">Toggle menu</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                     <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem onClick={() => handleEdit(resource)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                                    <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('resources', resource.id)}>
+                                                                        <Trash className="mr-2 h-4 w-4" />Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                         <ScrollBar orientation="horizontal" />
+                                     </ScrollArea>
                                      }
                                 </CardContent>
                             </Card>
@@ -861,6 +879,7 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                     {loading ? <p>Loading reviews...</p> :
+                                    <ScrollArea className="w-full whitespace-nowrap">
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
@@ -900,6 +919,8 @@ export default function AdminDashboardPage() {
                                                 ))}
                                             </TableBody>
                                         </Table>
+                                        <ScrollBar orientation="horizontal" />
+                                    </ScrollArea>
                                     }
                                 </CardContent>
                             </Card>
@@ -941,6 +962,7 @@ export default function AdminDashboardPage() {
 
                                     <div className="mt-8">
                                         <h3 className="text-lg font-semibold mb-4">Existing Internal Links</h3>
+                                        <ScrollArea className="w-full whitespace-nowrap">
                                         <div className="space-y-4">
                                             {allBlogPostsForLinks.filter(p => p.internalLinks && p.internalLinks.length > 0).map(post => (
                                                 <div key={post.slug}>
@@ -970,6 +992,8 @@ export default function AdminDashboardPage() {
                                                 </div>
                                             ))}
                                         </div>
+                                        <ScrollBar orientation="horizontal" />
+                                        </ScrollArea>
                                     </div>
                                 </CardContent>
                              </Card>
@@ -984,46 +1008,49 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                      {loading ? <p>Loading enrollments...</p> :
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Name</TableHead>
-                                                <TableHead className="hidden sm:table-cell">Email</TableHead>
-                                                <TableHead className="hidden md:table-cell">Phone</TableHead>
-                                                <TableHead>Submitted At</TableHead>
-                                                <TableHead>
-                                                    <span className="sr-only">Actions</span>
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {enrollments.map(enrollment => (
-                                                <TableRow key={enrollment.id}>
-                                                    <TableCell className="font-medium">{enrollment.name}</TableCell>
-                                                    <TableCell className="hidden sm:table-cell">{enrollment.email}</TableCell>
-                                                     <TableCell className="hidden md:table-cell">{enrollment.phone}</TableCell>
-                                                    <TableCell>{enrollment.submittedAt}</TableCell>
-                                                    <TableCell className="text-right">
-                                                         <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Toggle menu</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('enrollments', enrollment.id)}>
-                                                                    <Trash className="mr-2 h-4 w-4" />Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
+                                     <ScrollArea className="w-full whitespace-nowrap">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Name</TableHead>
+                                                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                                                    <TableHead className="hidden md:table-cell">Phone</TableHead>
+                                                    <TableHead>Submitted At</TableHead>
+                                                    <TableHead>
+                                                        <span className="sr-only">Actions</span>
+                                                    </TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {enrollments.map(enrollment => (
+                                                    <TableRow key={enrollment.id}>
+                                                        <TableCell className="font-medium">{enrollment.name}</TableCell>
+                                                        <TableCell className="hidden sm:table-cell">{enrollment.email}</TableCell>
+                                                         <TableCell className="hidden md:table-cell">{enrollment.phone}</TableCell>
+                                                        <TableCell>{enrollment.submittedAt}</TableCell>
+                                                        <TableCell className="text-right">
+                                                             <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                        <span className="sr-only">Toggle menu</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                     <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('enrollments', enrollment.id)}>
+                                                                        <Trash className="mr-2 h-4 w-4" />Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                        <ScrollBar orientation="horizontal" />
+                                    </ScrollArea>
                                      }
                                 </CardContent>
                             </Card>
@@ -1038,46 +1065,49 @@ export default function AdminDashboardPage() {
                                 </CardHeader>
                                 <CardContent>
                                      {loading ? <p>Loading messages...</p> :
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Name</TableHead>
-                                                <TableHead className="hidden sm:table-cell">Email</TableHead>
-                                                <TableHead>Message</TableHead>
-                                                <TableHead className="hidden md:table-cell">Submitted At</TableHead>
-                                                <TableHead>
-                                                    <span className="sr-only">Actions</span>
-                                                </TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {contacts.map(contact => (
-                                                <TableRow key={contact.id}>
-                                                    <TableCell className="font-medium">{contact.name}</TableCell>
-                                                    <TableCell className="hidden sm:table-cell">{contact.email}</TableCell>
-                                                    <TableCell className="max-w-[200px] sm:max-w-xs truncate">{contact.message}</TableCell>
-                                                    <TableCell className="hidden md:table-cell">{contact.submittedAt}</TableCell>
-                                                    <TableCell className="text-right">
-                                                         <DropdownMenu>
-                                                            <DropdownMenuTrigger asChild>
-                                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                                    <MoreHorizontal className="h-4 w-4" />
-                                                                    <span className="sr-only">Toggle menu</span>
-                                                                </Button>
-                                                            </DropdownMenuTrigger>
-                                                            <DropdownMenuContent align="end">
-                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                                 <DropdownMenuSeparator />
-                                                                <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('contacts', contact.id)}>
-                                                                    <Trash className="mr-2 h-4 w-4" />Delete
-                                                                </DropdownMenuItem>
-                                                            </DropdownMenuContent>
-                                                        </DropdownMenu>
-                                                    </TableCell>
+                                     <ScrollArea className="w-full whitespace-nowrap">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Name</TableHead>
+                                                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                                                    <TableHead>Message</TableHead>
+                                                    <TableHead className="hidden md:table-cell">Submitted At</TableHead>
+                                                    <TableHead>
+                                                        <span className="sr-only">Actions</span>
+                                                    </TableHead>
                                                 </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {contacts.map(contact => (
+                                                    <TableRow key={contact.id}>
+                                                        <TableCell className="font-medium">{contact.name}</TableCell>
+                                                        <TableCell className="hidden sm:table-cell">{contact.email}</TableCell>
+                                                        <TableCell className="max-w-[200px] sm:max-w-xs truncate">{contact.message}</TableCell>
+                                                        <TableCell className="hidden md:table-cell">{contact.submittedAt}</TableCell>
+                                                        <TableCell className="text-right">
+                                                             <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                        <span className="sr-only">Toggle menu</span>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                     <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem className="text-destructive" onClick={() => openConfirmationDialog('contacts', contact.id)}>
+                                                                        <Trash className="mr-2 h-4 w-4" />Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                         <ScrollBar orientation="horizontal" />
+                                     </ScrollArea>
                                      }
                                 </CardContent>
                             </Card>
