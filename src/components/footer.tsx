@@ -54,7 +54,7 @@ export default function Footer() {
             {/* Links Section - two columns */}
             <div className="md:col-span-2">
                  <h3 className="font-headline text-lg font-semibold mb-4">Quick Links</h3>
-                 <div className="grid grid-cols-2 gap-8 text-sm">
+                 <div className="grid grid-cols-2 gap-4 text-sm">
                     <ul className="space-y-2">
                         {quickLinks.map((item) => (
                             <li key={item.href}>
