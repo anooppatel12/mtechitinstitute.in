@@ -1,90 +1,56 @@
 
-"use client";
-
-import { useState, useMemo } from "react";
-import BlogCard from "@/components/blog-card";
-import AdPlaceholder from "@/components/ad-placeholder";
+import { db } from "@/lib/firebase";
+import { collection, getDocs, orderBy } from "firebase/firestore";
 import type { BlogPost } from "@/lib/types";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { X, Search } from "lucide-react";
-import Link from "next/link";
+import BlogPageClient from "@/components/blog-page-client";
+import type { Metadata } from 'next';
 
-// Note: This is now a client component. 
-// For a production app with a lot of posts, you might move fetching into a hook
-// or use server-side search. For now, we'll assume the data is passed as props.
-// To keep SEO benefits, we can fetch data in a parent Server Component, which we will do.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mtechitinstitute.in";
 
-export default function BlogPageClient({ posts, popularTags }: { posts: BlogPost[], popularTags: string[] }) {
-  const [searchTerm, setSearchTerm] = useState("");
+export const metadata: Metadata = {
+  title: "Tech Blog - MTech IT Institute",
+  description: "Explore the latest in tech with articles from MTech IT Institute. Discover insights on web development, digital marketing, and essential IT skills.",
+  alternates: {
+    canonical: `${siteUrl}/blog`,
+  },
+   openGraph: {
+    title: "Tech Blog - MTech IT Institute",
+    description: "Explore the latest in tech with articles from MTech IT Institute. Discover insights on web development, digital marketing, and essential IT skills.",
+    url: `${siteUrl}/blog`,
+  },
+};
 
-  const filteredPosts = useMemo(() => {
-    const postList = posts || [];
-    if (!searchTerm) {
-      return postList;
-    }
-    return postList.filter(post =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.summary?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [posts, searchTerm]);
+// This forces the page to be dynamically rendered, ensuring data is always fresh
+export const revalidate = 0;
 
-  return (
-    <div className="bg-secondary">
-      <div className="container py-16 sm:py-24">
-        <div className="text-center mb-12">
-          <h1 className="font-headline text-4xl font-bold text-primary sm:text-5xl">Our Tech Blog</h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-primary/80">
-            Find insights, tutorials, and career advice from our IT experts. Stay updated with the latest trends in technology.
-          </p>
-        </div>
+async function getBlogData(): Promise<{ posts: BlogPost[], tags: string[] }> {
+    const blogQuery = query(collection(db, "blog"), orderBy("date", "desc"));
+    const blogSnapshot = await getDocs(blogQuery);
+    
+    const posts = blogSnapshot.docs.map(doc => {
+        const data = doc.data() as Omit<BlogPost, 'slug' | 'summary'>;
+        const summary = data.content.replace(/<[^>]+>/g, '').substring(0, 150) + '...';
+        return { slug: doc.id, ...data, summary } as BlogPost;
+    });
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-            <main className="lg:col-span-3">
-                <div className="mb-8 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                        type="text"
-                        placeholder="Search articles..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 text-base"
-                    />
-                    {searchTerm && (
-                        <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7" onClick={() => setSearchTerm('')}>
-                           <X className="h-5 w-5" />
-                        </Button>
-                    )}
-                </div>
+    const tagCounts = posts.reduce((acc, post) => {
+        post.tags.forEach(tag => {
+            acc[tag] = (acc[tag] || 0) + 1;
+        });
+        return acc;
+    }, {} as Record<string, number>);
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {filteredPosts && filteredPosts.length > 0 ? (
-                      filteredPosts.map((post) => (
-                          <BlogCard key={post.slug} post={post} />
-                      ))
-                    ) : (
-                       <div className="md:col-span-2 text-center py-12">
-                          <p className="text-lg text-muted-foreground">No articles found matching your search.</p>
-                       </div>
-                    )}
-                </div>
-            </main>
-            <aside className="lg:col-span-1 space-y-8">
-                <div className="p-6 bg-background rounded-lg shadow-sm">
-                    <h3 className="font-headline text-lg font-semibold text-primary mb-4">Popular Tags</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {popularTags && popularTags.map(tag => (
-                            <Link href={`/blog/tag/${tag}`} key={tag}>
-                                <Badge variant="outline">{tag}</Badge>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-                <AdPlaceholder />
-            </aside>
-        </div>
-      </div>
-    </div>
-  );
+    const popularTags = Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(entry => entry[0]);
+
+    return { posts, tags: popularTags };
+}
+
+
+export default async function BlogPage() {
+    const { posts, tags } = await getBlogData();
+
+    return <BlogPageClient posts={posts} popularTags={tags} />;
 }
