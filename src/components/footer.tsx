@@ -14,9 +14,9 @@ export default function Footer() {
   return (
     <footer className="bg-secondary text-secondary-foreground">
       <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Institute Info */}
-          <div className="space-y-4 md:col-span-2">
+          <div className="space-y-4 lg:col-span-5">
             <Logo />
             <p className="text-sm max-w-md">
               MTech IT Institute is dedicated to providing top-quality IT training and computer courses to empower students for a successful career in technology.
@@ -37,39 +37,40 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-headline text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              {footerQuickLinks.map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="hover:text-accent transition-colors">
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-               <li>
-                  <Link href="/admin/login" className="hover:text-accent transition-colors">
-                    Admin Login
-                  </Link>
-                </li>
-            </ul>
-          </div>
+          {/* Quick Links and Social Media */}
+          <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-3 gap-8">
+             <div className="md:col-span-2">
+                <h3 className="font-headline text-lg font-semibold mb-4">Quick Links</h3>
+                <ul className="space-y-2 text-sm columns-2 md:columns-1">
+                  {footerQuickLinks.map((item) => (
+                    <li key={item.href} className="break-inside-avoid">
+                      <Link href={item.href} className="hover:text-accent transition-colors">
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
+                   <li>
+                      <Link href="/admin/login" className="hover:text-accent transition-colors">
+                        Admin Login
+                      </Link>
+                    </li>
+                </ul>
+              </div>
 
-          {/* Social Media */}
-          <div>
-            <h3 className="font-headline text-lg font-semibold mb-4">Follow Us</h3>
-            <div className="flex space-x-4">
-              <Link href="#contact" aria-label="WhatsApp" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
-                <Send className="w-5 h-5" />
-              </Link>
-              <Link href="https://www.facebook.com/people/Mtech-it-institute/61562000094984/?mibextid=ZbWKwL" aria-label="Facebook" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link href="https://www.instagram.com/mtechitinstitute" aria-label="Instagram" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
-                <Instagram className="w-5 h-5" />
-              </Link>
-            </div>
+              <div>
+                <h3 className="font-headline text-lg font-semibold mb-4">Follow Us</h3>
+                <div className="flex space-x-4">
+                  <Link href="#contact" aria-label="WhatsApp" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Send className="w-5 h-5" />
+                  </Link>
+                  <Link href="https://www.facebook.com/people/Mtech-it-institute/61562000094984/?mibextid=ZbWKwL" aria-label="Facebook" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Facebook className="w-5 h-5" />
+                  </Link>
+                  <Link href="https://www.instagram.com/mtechitinstitute" aria-label="Instagram" className="p-2 bg-primary/10 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
+                    <Instagram className="w-5 h-5" />
+                  </Link>
+                </div>
+              </div>
           </div>
         </div>
 
